@@ -1,6 +1,6 @@
 # thegrove.media
 
-Static landing page for TheGrove Media (Human in the Loop, The Quill, The Little Feather).
+Static landing page for TheGrove Studio (Human in the Loop, The Quill, The Little Feather).
 Zero backend, zero build step. Cloudflare Pages serves this repo's root directly.
 
 > **`index.html` is generated. Never edit it directly.** It is built from

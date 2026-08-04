@@ -41,7 +41,15 @@ def build_hash():
     return h.hexdigest()
 
 
-ROLE_LABELS = {"produced": "Produced by TheGrove Media"}
+def role_label(role, studio_name):
+    """Build the eyebrow label for a show's role. Data-driven off `studio_name`
+    so a studio rename is a one-line content edit, not a code edit. Only the
+    "produced" role exists today - an unknown role must still raise loudly
+    rather than emit a blank eyebrow.
+    """
+    if role == "produced":
+        return f"Produced by {studio_name}"
+    raise ValueError(f"unknown show role {role!r}")
 
 
 def esc(s):
@@ -141,7 +149,7 @@ def render_latest_block(latest):
     return '<p class="latest-empty">New episodes will appear here.</p>'
 
 
-def render_show(show, icons):
+def render_show(show, icons, studio_name):
     validate_show(show)
     style = (
         f'--field:{show["field"]}; --ink:{show["ink"]}; --accent:{show["accent"]}; '
@@ -149,7 +157,7 @@ def render_show(show, icons):
         f'--display:\'{show["display"]}\',serif; --body-font:\'{show["body"]}\',sans-serif;'
     )
     show_id = esc(show["id"])
-    eyebrow = ROLE_LABELS[show["role"]]
+    eyebrow = role_label(show["role"], studio_name)
 
     lead_html = ""
     if show.get("lead"):
@@ -232,12 +240,12 @@ PAGE_HEAD = '''<!doctype html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>TheGrove Media</title>
+<title>{studio_name}</title>
 <link rel="canonical" href="https://thegrove.media/">
-<meta name="description" content="TheGrove Media - Human in the Loop, The Quill, and The Little Feather.">
+<meta name="description" content="{studio_name} - {show_list}.">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta property="og:title" content="TheGrove Media">
-<meta property="og:description" content="TheGrove Media - Human in the Loop, The Quill, and The Little Feather.">
+<meta property="og:title" content="{studio_name}">
+<meta property="og:description" content="{studio_name} - {show_list}.">
 <meta property="og:image" content="https://thegrove.media/assets/og-image.png">
 <meta property="og:url" content="https://thegrove.media/">
 <meta property="og:type" content="website">
@@ -260,6 +268,16 @@ PAGE_TAIL = '''
 '''
 
 
+def join_names(names):
+    """Oxford-comma join for the meta-description show list, so a fourth show
+    added to channels.json is reflected here with no code change."""
+    if len(names) == 1:
+        return names[0]
+    if len(names) == 2:
+        return f"{names[0]} and {names[1]}"
+    return ", ".join(names[:-1]) + f", and {names[-1]}"
+
+
 def render_masthead(studio, shows):
     nav_links = "".join(
         f'<a href="#{s["id"]}">{esc(s["name"])}</a><span aria-hidden="true">&middot;</span>'
@@ -267,7 +285,7 @@ def render_masthead(studio, shows):
     ) + '<a href="#about">About</a>'
     return f'''  <header class="masthead">
     <div class="masthead-inner">
-      <img class="badge" src="{esc(studio["badge"])}" alt="TheGrove Media studio badge" width="84" height="84" loading="eager">
+      <img class="badge" src="{esc(studio["badge"])}" alt="{esc(studio["name"])} studio badge" width="84" height="84" loading="eager">
       <h1 class="wordmark">{esc(studio["name"])}</h1>
       <p class="studio-tagline">{esc(studio["tagline"])}</p>
       <nav class="masthead-nav" aria-label="Shows on this page">
@@ -304,8 +322,13 @@ def render_page(channels, icons):
     source_hash = build_hash()
     studio = channels["studio"]
     shows = sorted(channels["shows"], key=lambda s: s["order"])
+    show_list = join_names([s["name"] for s in shows])
 
-    parts = [PAGE_HEAD.format(source_hash=source_hash)]
+    parts = [PAGE_HEAD.format(
+        source_hash=source_hash,
+        studio_name=esc(studio["name"]),
+        show_list=esc(show_list),
+    )]
     parts.append(f'<a class="skip-link" href="#{shows[0]["id"]}">Skip to shows</a>')
     parts.append('<div class="page">')
     parts.append(render_masthead(studio, shows))
@@ -313,7 +336,7 @@ def render_page(channels, icons):
     parts.append(render_icon_sprite(icons))
     parts.append('    <div class="stack">')
     for show in shows:
-        parts.append(render_show(show, icons))
+        parts.append(render_show(show, icons, studio["name"]))
     parts.append('    </div>')
     parts.append(render_about(studio))
     parts.append('  </main>')

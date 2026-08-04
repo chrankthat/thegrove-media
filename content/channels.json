@@ -1,9 +1,9 @@
 {
   "_note": "Single source of truth for every rendered string on the page. Edit here, then run `python3 scripts/render.py` and commit the regenerated index.html together with this file. Cadence `source`/`verified` fields are provenance metadata for a deferred scheduled freshness check; they are deliberately not rendered.",
   "studio": {
-    "name": "TheGrove Media",
+    "name": "TheGrove Studio",
     "tagline": "The best stories are never about the big thing, but the human moment inside it.",
-    "about": "I'm Chris Shanku. I build real systems for a living and tell true stories on stage - I won a Moth StorySLAM with this one. Technology is best when it enables human connection - period. TheGrove Media is the studio behind Human in the Loop, The Quill, and The Little Feather, a project of TheGrove AI, LLC. More about me at shanku.net, more about the company at thegrove.llc.",
+    "about": "I'm Chris Shanku. I build real systems for a living and tell true stories on stage - I won a Moth StorySLAM with this one. Technology is best when it enables human connection - period. TheGrove Studio is the home of Human in the Loop, The Quill, and The Little Feather, a project of TheGrove AI, LLC. More about me at shanku.net, more about the company at thegrove.llc.",
     "aboutLinks": [
       { "text": "this one", "url": "https://youtu.be/2Lj3Ujrk2Ys" },
       { "text": "shanku.net", "url": "https://shanku.net" },

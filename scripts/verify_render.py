@@ -82,7 +82,7 @@ def run_checks(base, remote, shot_dir):
             page.mouse.wheel(0, 20000)          # trigger loading="lazy" images
             page.wait_for_timeout(700)
 
-            pass_(f"{name}: page loads", page.title() == "TheGrove Media")
+            pass_(f"{name}: page loads", page.title() == "TheGrove Studio")
             pass_(f"{name}: three shows in DOM", page.locator("section.show").count() == 3)
             pass_(f"{name}: every subresource 2xx/3xx",
                   not bad_responses, "; ".join(bad_responses[:5]))

@@ -11,6 +11,7 @@ ICONS = json.loads((ROOT / "content" / "icons.json").read_text())
 QUILL = next(s for s in CHANNELS["shows"] if s["id"] == "the-quill")
 TLF = next(s for s in CHANNELS["shows"] if s["id"] == "the-little-feather")
 HITL = next(s for s in CHANNELS["shows"] if s["id"] == "human-in-the-loop")
+STUDIO_NAME = CHANNELS["studio"]["name"]
 
 
 class TestRenderIconSprite(unittest.TestCase):
@@ -22,7 +23,7 @@ class TestRenderIconSprite(unittest.TestCase):
 
 class TestRenderShow(unittest.TestCase):
     def test_section_id_and_field_accent_custom_properties(self):
-        out = render_show(QUILL, ICONS)
+        out = render_show(QUILL, ICONS, STUDIO_NAME)
         self.assertIn('id="the-quill"', out)
         self.assertIn("--field:#251E19", out)
         self.assertIn("--accent:#C2643A", out)
@@ -33,30 +34,30 @@ class TestRenderShow(unittest.TestCase):
         # "Verified Aug 4" line must not appear in output, at any breakpoint,
         # even though channels.json still carries the source/verified fields.
         for show in (QUILL, TLF, HITL):
-            out = render_show(show, ICONS)
+            out = render_show(show, ICONS, STUDIO_NAME)
             self.assertNotIn("Verified", out)
             self.assertNotIn("cadence-verified", out)
 
     def test_cadence_display_text_still_renders(self):
-        out = render_show(QUILL, ICONS)
+        out = render_show(QUILL, ICONS, STUDIO_NAME)
         self.assertIn("New stories every Sunday, Tuesday, and Friday.", out)
         self.assertIn("A new My Lost Chapters every month.", out)
 
     def test_extra_line_renders_only_when_present(self):
-        self.assertIn("My Lost Chapters is the exception", render_show(QUILL, ICONS))
-        self.assertNotIn("extra-line", render_show(TLF, ICONS))
+        self.assertIn("My Lost Chapters is the exception", render_show(QUILL, ICONS, STUDIO_NAME))
+        self.assertNotIn("extra-line", render_show(TLF, ICONS, STUDIO_NAME))
 
     def test_cohost_renders_only_for_hitl_with_buildwithsash_link(self):
-        hitl_out = render_show(HITL, ICONS)
+        hitl_out = render_show(HITL, ICONS, STUDIO_NAME)
         self.assertIn("cohost-credit", hitl_out)
         self.assertIn('href="https://buildwithsash.com"', hitl_out)
         self.assertNotIn("linkedin.com/in/shasmo", hitl_out)
-        self.assertNotIn("cohost-credit", render_show(QUILL, ICONS))
+        self.assertNotIn("cohost-credit", render_show(QUILL, ICONS, STUDIO_NAME))
 
     def test_lead_lines_render_only_for_hitl(self):
-        hitl_out = render_show(HITL, ICONS)
+        hitl_out = render_show(HITL, ICONS, STUDIO_NAME)
         self.assertIn("Two ex-Microsoft builders.", hitl_out)
-        self.assertNotIn("lead-lines", render_show(QUILL, ICONS))
+        self.assertNotIn("lead-lines", render_show(QUILL, ICONS, STUDIO_NAME))
 
     def test_listen_block_omitted_when_empty(self):
         # None of the three currently has an empty listen[], but the
@@ -64,24 +65,24 @@ class TestRenderShow(unittest.TestCase):
         # when listen is empty. Exercise it directly against the function.
         fake_show = dict(QUILL)
         fake_show["listen"] = []
-        out = render_show(fake_show, ICONS)
+        out = render_show(fake_show, ICONS, STUDIO_NAME)
         self.assertNotIn(">Listen<", out)
 
     def test_amazon_music_and_tunein_get_generic_icon_labels(self):
-        out = render_show(HITL, ICONS)
+        out = render_show(HITL, ICONS, STUDIO_NAME)
         self.assertIn("generic placeholder icon, not an official logo", out)
         self.assertIn("TuneIn (generic icon)", out)
         self.assertIn("Amazon Music (generic icon)", out)
 
     def test_watch_renders_as_text_links_not_icons(self):
-        out = render_show(HITL, ICONS)
+        out = render_show(HITL, ICONS, STUDIO_NAME)
         self.assertIn('<a href="https://www.youtube.com/@hitlstream"', out)
         self.assertIn("Episode Takeaways", out)
 
     def test_linkedin_is_not_labelled_a_placeholder(self):
         # LinkedIn carries a provenance `note` but IS an official mark. Keying
         # the placeholder disclosure off `note` mislabelled it. FOLD-1/FOLD-5.
-        out = render_show(HITL, ICONS)
+        out = render_show(HITL, ICONS, STUDIO_NAME)
         self.assertIn('title="LinkedIn"', out)
         self.assertNotIn("LinkedIn (generic icon)", out)
 
@@ -89,14 +90,14 @@ class TestRenderShow(unittest.TestCase):
         sprite = render_icon_sprite(ICONS)
         import re as _re
         for show in (QUILL, TLF, HITL):
-            for ref in _re.findall(r'<use href="#(icon-[a-z0-9-]+)">', render_show(show, ICONS)):
+            for ref in _re.findall(r'<use href="#(icon-[a-z0-9-]+)">', render_show(show, ICONS, STUDIO_NAME)):
                 self.assertIn(f'id="{ref}"', sprite, f"{ref} has no <symbol> in the sprite")
 
     def test_malformed_color_fails_loud(self):
         bad = dict(QUILL)
         bad["accent"] = '#fff" onload="alert(1)'
         with self.assertRaises(ValueError):
-            render_show(bad, ICONS)
+            render_show(bad, ICONS, STUDIO_NAME)
 
 
 if __name__ == "__main__":
