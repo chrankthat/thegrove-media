@@ -1,0 +1,220 @@
+#!/usr/bin/env python3
+"""Playwright headless verification: rendering at 3 widths, subresource
+integrity, the mobile disclosure interaction, JS-disabled core content, and a
+console-error gate.
+
+Local by default. Pass --base-url https://thegrove.media/ to run the same
+assertions against the live origin (feedback_curl_is_not_browser_verification.md
+- a 200 from curl proves the edge is up, not that the page renders).
+
+The console-error gate runs LOCAL ONLY: Cloudflare injects its Web Analytics
+beacon at the edge, which errors in egress-restricted browsers and would make
+the remote run flap (feedback_cf_edge_beacon_console_gate.md).
+
+Serve host defaults to loopback. Set SERVE_HOST=10.9.5.10 when Chris needs to
+open the served page from another machine (feedback_serve_urls_use_lan_ip.md).
+"""
+import argparse
+import http.server
+import os
+import socketserver
+import sys
+import threading
+import time
+from pathlib import Path
+
+from playwright.sync_api import sync_playwright
+
+ROOT = Path(__file__).resolve().parent.parent
+HOST = os.environ.get("SERVE_HOST", "127.0.0.1")
+PORT = int(os.environ.get("SERVE_PORT", "8095"))
+
+VIEWPORTS = [("phone", 375, 812), ("tablet", 800, 1024), ("desktop", 1280, 900)]
+
+# Evaluated per viewport by run_checks. Kept as a module constant so the
+# quoting stays readable.
+JS_STYLING = """() => {
+  const cs = getComputedStyle(document.body);
+  const show = document.querySelector('section.show');
+  return {
+    paper: getComputedStyle(document.documentElement)
+             .getPropertyValue('--paper').trim(),
+    showBg: show ? getComputedStyle(show).backgroundColor : null,
+    painted: cs.backgroundColor !== 'rgba(0, 0, 0, 0)'
+             || cs.backgroundImage !== 'none',
+  };
+}"""
+
+failures = []
+
+
+def pass_(label, ok, extra=""):
+    print(f"{'PASS' if ok else 'FAIL'} {label}{(' :: ' + extra) if extra else ''}")
+    if not ok:
+        failures.append(label)
+
+
+class ReusableServer(socketserver.TCPServer):
+    # Without this, a re-run inside TIME_WAIT dies with 'Address already in use'
+    # inside the daemon thread, where the traceback is easy to miss.
+    allow_reuse_address = True
+
+
+def serve():
+    os.chdir(ROOT)
+    with ReusableServer((HOST, PORT), http.server.SimpleHTTPRequestHandler) as httpd:
+        httpd.serve_forever()
+
+
+def run_checks(base, remote, shot_dir):
+    with sync_playwright() as p:
+        browser = p.chromium.launch(headless=True)
+
+        for name, w, h in VIEWPORTS:
+            page = browser.new_page(viewport={"width": w, "height": h})
+            console_errors, bad_responses = [], []
+            page.on("console",
+                    lambda m: console_errors.append(m.text) if m.type == "error" else None)
+            page.on("response",
+                    lambda r: bad_responses.append(f"{r.status} {r.url}")
+                    if r.status >= 400 else None)
+            page.goto(base, wait_until="networkidle")
+            page.mouse.wheel(0, 20000)          # trigger loading="lazy" images
+            page.wait_for_timeout(700)
+
+            pass_(f"{name}: page loads", page.title() == "TheGrove Media")
+            pass_(f"{name}: three shows in DOM", page.locator("section.show").count() == 3)
+            pass_(f"{name}: every subresource 2xx/3xx",
+                  not bad_responses, "; ".join(bad_responses[:5]))
+            pass_(f"{name}: no 'Verified Aug' text", "Verified Aug" not in page.content())
+            pass_(f"{name}: Sash link is buildwithsash.com",
+                  page.locator('a[href="https://buildwithsash.com"]').count() == 1)
+            pass_(f"{name}: canonical points at apex",
+                  page.locator('link[rel="canonical"][href="https://thegrove.media/"]')
+                      .count() == 1)
+
+            if not remote:
+                pass_(f"{name}: zero console errors",
+                      len(console_errors) == 0, str(console_errors))
+
+            # Stylesheets actually PARSED - a 200 on the CSS is not proof of that.
+            #
+            # CORRECTED 2026-08-04 at Task 10, raised by the Task 10 implementer.
+            # An earlier revision asserted getComputedStyle(document.body)
+            # .backgroundColor was not the default. That is wrong at phone width:
+            # below 768px body carries a gradient-only `background` shorthand (the
+            # intentional "wall" texture), which sets background-IMAGE and leaves
+            # background-COLOR as rgba(0,0,0,0). Measured: phone
+            # bodyBg=rgba(0,0,0,0) bodyImg=radial-gradient(...); tablet and desktop
+            # bodyBg=rgb(239,227,204) bodyImg=none. The implementer correctly
+            # reported it as a bad assertion rather than loosening it or editing
+            # the CSS.
+            #
+            # These three hold at every width and prove more than the original did:
+            # the token sheet parsed, the site sheet parsed AND is consuming the
+            # per-show custom properties, and the body is painted by one mechanism
+            # or the other.
+            styling = page.evaluate(JS_STYLING)
+            pass_(f"{name}: tokens.css parsed (--paper resolves)",
+                  styling["paper"] == "#EFE3CC", styling["paper"])
+            pass_(f"{name}: site.css parsed and consuming per-show --field",
+                  styling["showBg"] == "rgb(37, 30, 25)", str(styling["showBg"]))
+            pass_(f"{name}: body is painted", styling["painted"])
+
+            # Every RENDERED <img> decoded to real pixels.
+            #
+            # The getClientRects() filter is load-bearing, not defensive noise.
+            # At phone width the show panels are collapsed (display:none), and
+            # Chrome does not fetch loading="lazy" images inside a display:none
+            # subtree - so assets/sash-photo.jpg legitimately reports
+            # naturalWidth === 0 there. Verified directly: an unfiltered check
+            # reports 1 false failure at 375px and 0 at 1280px. Filtering to
+            # images that actually have a box keeps the gate honest at every
+            # width instead of only at desktop.
+            broken = page.evaluate("""
+                Array.from(document.images)
+                     .filter(i => i.getClientRects().length > 0)
+                     .filter(i => !i.complete || i.naturalWidth === 0)
+                     .map(i => i.getAttribute('src'))
+            """)
+            pass_(f"{name}: all images decoded", not broken, str(broken))
+
+            if name == "phone":
+                # The whole mobile interaction model is the checkbox hack. A broken
+                # for/id pairing passes every other assertion in this file.
+                panel = page.locator("#the-quill .panel").first
+                pass_("phone: panel collapsed before tap", not panel.is_visible())
+                page.locator('label[for="disc-the-quill"]').first.click()
+                page.wait_for_timeout(250)
+                pass_("phone: panel expands on tap", panel.is_visible())
+            else:
+                pass_(f"{name}: panel open by default at >=768px",
+                      page.locator("#the-quill .panel").first.is_visible())
+
+            # Scroll back to the top BEFORE capturing. This is not cosmetic.
+            #
+            # body's backdrop is a `background-attachment: fixed` gradient. If the
+            # page is left scrolled when Playwright takes a full_page screenshot,
+            # Chromium's stitched capture drops that fixed layer entirely and the
+            # image comes out on white - the masthead's cream wordmark then reads
+            # as near-invisible cream-on-white and the shot looks like a broken
+            # site. Isolated 2026-08-04 by bisection:
+            #   scroll=no  full_page=yes -> top-left rgb(27,20,15)   correct
+            #   scroll=yes full_page=yes -> top-left rgb(255,255,255) ARTIFACT
+            #   scroll=yes full_page=no  -> top-left rgb(27,20,15)   correct
+            # These screenshots are the durable evidence artifact a human reviews,
+            # so a misleading one is worse than none.
+            page.evaluate("window.scrollTo(0, 0)")
+            page.wait_for_timeout(350)
+
+            shot_dir.mkdir(parents=True, exist_ok=True)
+            tag = "live" if remote else "local"
+            page.screenshot(path=str(shot_dir / f"{tag}-{name}.png"), full_page=True)
+            page.close()
+
+        # --- No-JS: disable JS entirely; core content must still be present ---
+        context = browser.new_context(java_script_enabled=False,
+                                      viewport={"width": 1280, "height": 900})
+        page = context.new_page()
+        page.goto(base, wait_until="load")
+        pass_("no-JS: three show sections present",
+              page.locator("section.show").count() == 3)
+        pass_("no-JS: youtube links present",
+              page.locator('a[href*="youtube.com"]').count() >= 3)
+        pass_("no-JS: about links present",
+              page.locator('a[href="https://shanku.net"]').count() == 1)
+        context.close()
+        browser.close()
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--base-url", default=None,
+                    help="verify a remote origin instead of a local serve")
+    ap.add_argument("--shot-dir", default=None)
+    args = ap.parse_args()
+
+    remote = args.base_url is not None
+    if remote:
+        base = args.base_url
+    else:
+        threading.Thread(target=serve, daemon=True).start()
+        time.sleep(0.6)
+        base = f"http://{HOST}:{PORT}/"
+
+    default_shots = (
+        "/Users/trunk/TheGrove/domains/site/thegrove-media/v1.1.0/verification"
+    )
+    shot_dir = Path(args.shot_dir or default_shots)
+
+    print(f"verifying {base}  (mode: {'REMOTE' if remote else 'LOCAL'})\n")
+    run_checks(base, remote, shot_dir)
+
+    print(f"\n{'ALL PASS' if not failures else str(len(failures)) + ' FAILURES'}: "
+          f"{', '.join(failures) if failures else ''}")
+    print(f"screenshots -> {shot_dir}")
+    sys.exit(1 if failures else 0)
+
+
+if __name__ == "__main__":
+    main()
