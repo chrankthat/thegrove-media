@@ -116,7 +116,7 @@
         { "label": "Podcast Index", "icon": "Podcast Index", "url": "https://podcastindex.org/podcast/7975515" },
         { "label": "Castbox", "icon": "Castbox", "url": "https://castbox.fm/vh/7339793" },
         { "label": "Deezer", "icon": "Deezer", "url": "https://link.deezer.com/s/33YwdkXk0GoN151KVHG7k" },
-        { "label": "TuneIn", "icon": "TuneIn", "url": "https://tun.in/pykrl" },
+        { "label": "TuneIn", "icon": "TuneIn", "url": "https://tunein.com/podcasts/Technology-Podcasts/Human-in-the-Loop-Two-Ex-Microsoft-Builders-on-AI-p4771723/" },
         { "label": "Amazon Music", "icon": "Amazon Music", "url": "https://music.amazon.com/podcasts/78d86395-5c08-4e61-abe1-534b371172c7/human-in-the-loop-two-ex-microsoft-builders-on-ai" },
         { "label": "RSS", "icon": "RSS", "url": "https://rss.humanintheloop.stream/podcast.xml" }
       ],
