@@ -35,12 +35,32 @@ class TestRenderPage(unittest.TestCase):
         self.assertIn('href="https://shanku.net"', self.out)
         self.assertIn('href="https://thegrove.llc"', self.out)
 
-    def test_content_hash_meta_matches_all_build_inputs(self):
-        from scripts.render import build_hash
-        self.assertIn(
-            f'<meta name="x-thegrove-media-source-sha256" content="{build_hash()}">',
-            self.out,
-        )
+    def test_content_hash_meta_changes_when_a_build_input_changes(self):
+        # A real regression test, not a tautology: the old version compared
+        # build_hash() against the value render_page already generated using
+        # build_hash(), so it could never fail. This perturbs a real build
+        # input (css/site.css) on disk, confirms the meta hash tracks it,
+        # then restores the file and confirms the hash reverts too.
+        # try/finally guarantees a failure here cannot leave a dirty file.
+        from scripts.render import build_hash, render_page
+
+        css_path = ROOT / "css" / "site.css"
+        original_css = css_path.read_text()
+        original_hash = build_hash()
+        try:
+            css_path.write_text(original_css + "\n/* test perturbation */\n")
+            perturbed_hash = build_hash()
+            self.assertNotEqual(original_hash, perturbed_hash)
+
+            perturbed_page = render_page(CHANNELS, ICONS)
+            self.assertIn(
+                f'<meta name="x-thegrove-media-source-sha256" content="{perturbed_hash}">',
+                perturbed_page,
+            )
+        finally:
+            css_path.write_text(original_css)
+
+        self.assertEqual(build_hash(), original_hash)
 
     def test_generated_marker_and_canonical_present(self):
         self.assertIn("GENERATED FILE - DO NOT EDIT DIRECTLY", self.out)

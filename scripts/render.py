@@ -74,7 +74,7 @@ def hex_to_rgb_csv(hex_color):
 
 
 COLOR_RE = re.compile(r"^#[0-9A-Fa-f]{6}$")
-NAME_RE = re.compile(r"^[A-Za-z0-9 .'-]+$")
+NAME_RE = re.compile(r"^[A-Za-z0-9 .-]+$")
 ID_RE = re.compile(r"^[a-z0-9-]+$")
 
 
@@ -155,10 +155,8 @@ def render_schedule_block(cadence):
 
 
 def render_latest_block(latest):
-    if latest:
-        items = "\n".join(f"<li>{esc(i)}</li>" for i in latest)
-        return f'<ul class="latest-list">\n{items}\n</ul>'
-    return '<p class="latest-empty">New episodes will appear here.</p>'
+    items = "\n".join(f"<li>{esc(i)}</li>" for i in latest)
+    return f'<ul class="latest-list">\n{items}\n</ul>'
 
 
 def render_show(show, icons, studio_name):
@@ -191,6 +189,37 @@ def render_show(show, icons, studio_name):
             f'rel="noopener noreferrer">{esc(c["name"])}</a></p></div>'
         )
 
+    schedule_html = render_schedule_block(show["cadence"]) if show["cadence"] else ""
+    schedule_block = ""
+    if schedule_html:
+        schedule_block = (
+            '<div class="sidebar-block"><h3 class="sidebar-label">'
+            '<span class="dot" aria-hidden="true"></span>Schedule</h3>'
+            f'{schedule_html}</div>'
+        )
+
+    # Omit the whole "Latest Episodes" block when there is no data - an absent
+    # section is honest, a section that says "no episodes" is not. See spec
+    # S5 / the 2026-08-04 false-episode-claim fix. Populating `latest` from
+    # the live feeds is deliberately out of scope for this build.
+    latest_html = render_latest_block(show["latest"]) if show["latest"] else ""
+    latest_block = ""
+    if latest_html:
+        latest_block = (
+            '<div class="sidebar-block"><h3 class="sidebar-label">'
+            '<span class="dot" aria-hidden="true"></span>Latest Episodes</h3>'
+            f'<hr class="latest-rule">\n{latest_html}</div>'
+        )
+
+    watch_html = render_link_list(show["watch"]) if show["watch"] else ""
+    watch_block = ""
+    if watch_html:
+        watch_block = (
+            '<div class="sidebar-block"><h3 class="sidebar-label">'
+            '<span class="dot" aria-hidden="true"></span>Watch</h3>'
+            f'<ul class="link-list">\n{watch_html}\n</ul></div>'
+        )
+
     listen_html = render_icon_row(show["listen"], icons, "Listen") if show["listen"] else ""
     listen_block = ""
     if listen_html:
@@ -219,18 +248,7 @@ def render_show(show, icons, studio_name):
               </div>
             </div>
             <aside class="sidebar" aria-label="{esc(show["name"])} - schedule and links">
-              <div class="sidebar-block"><h3 class="sidebar-label"><span class="dot" aria-hidden="true"></span>Schedule</h3>
-                {render_schedule_block(show["cadence"])}
-              </div>
-              <div class="sidebar-block"><h3 class="sidebar-label"><span class="dot" aria-hidden="true"></span>Latest Episodes</h3>
-                <hr class="latest-rule">
-                {render_latest_block(show["latest"])}
-              </div>
-              <div class="sidebar-block"><h3 class="sidebar-label"><span class="dot" aria-hidden="true"></span>Watch</h3>
-                <ul class="link-list">
-{render_link_list(show["watch"])}
-                </ul>
-              </div>{listen_block}
+              {schedule_block}{latest_block}{watch_block}{listen_block}
               <div class="sidebar-block"><h3 class="sidebar-label"><span class="dot" aria-hidden="true"></span>Socials</h3>
                 <ul class="icon-row">
 {render_icon_row(show["socials"], icons, "Follow")}
@@ -297,7 +315,7 @@ def render_masthead(studio, shows):
     ) + '<a href="#about">About</a>'
     return f'''  <header class="masthead">
     <div class="masthead-inner">
-      <img class="badge" src="{esc(studio["badge"])}" alt="{esc(studio["name"])} studio badge" width="84" height="84" loading="eager">
+      <img class="badge" src="{esc(studio["badge"])}" alt="{esc(studio["name"])} badge" width="84" height="84" loading="eager">
       <h1 class="wordmark">{esc(studio["name"])}</h1>
       <p class="studio-tagline">{esc(studio["tagline"])}</p>
       <nav class="masthead-nav" aria-label="Shows on this page">
@@ -308,13 +326,19 @@ def render_masthead(studio, shows):
 
 
 def render_about(studio):
-    about_html = esc(studio["about"])
+    # Count every needle against the ORIGINAL escaped text, before any
+    # substitutions happen. Counting against the progressively-substituted
+    # about_html means an earlier link's inserted <a href="..."> markup can
+    # contain a later needle as a substring of its URL, corrupting the count
+    # for a legitimate edit that never touches the source text.
+    original_html = esc(studio["about"])
+    about_html = original_html
     for link in studio["aboutLinks"]:
         needle = esc(link["text"])
-        if about_html.count(needle) != 1:
+        if original_html.count(needle) != 1:
             raise ValueError(
                 f'aboutLinks text {link["text"]!r} appears '
-                f'{about_html.count(needle)} times in studio.about; expected exactly 1'
+                f'{original_html.count(needle)} times in studio.about; expected exactly 1'
             )
         anchor = (f'<a href="{esc(link["url"])}" target="_blank" '
                   f'rel="noopener noreferrer">{needle}</a>')

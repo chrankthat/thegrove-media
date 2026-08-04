@@ -99,6 +99,54 @@ class TestRenderShow(unittest.TestCase):
         with self.assertRaises(ValueError):
             render_show(bad, ICONS, STUDIO_NAME)
 
+    def test_font_name_with_apostrophe_fails_loud(self):
+        # NAME_RE used to allow `'`, but `display`/`body` are interpolated
+        # inside a single-quoted CSS custom property
+        # (--display:'{name}',serif), so a font literally named O'Sans would
+        # close the CSS string early and silently break the rule.
+        bad = dict(QUILL)
+        bad["display"] = "O'Sans"
+        with self.assertRaises(ValueError):
+            render_show(bad, ICONS, STUDIO_NAME)
+
+    def test_font_name_with_space_and_hyphen_still_passes(self):
+        ok = dict(QUILL)
+        ok["display"] = "Some-Font Name"
+        out = render_show(ok, ICONS, STUDIO_NAME)
+        self.assertIn("--display:'Some-Font Name',serif", out)
+
+    def test_latest_block_omitted_when_empty(self):
+        # Same contract as listen: an absent section is honest, a section
+        # that says "no episodes" is not (the false-episode-claim fix).
+        # None of the three shows in channels.json has `latest` populated
+        # today, so this holds for real data too.
+        out = render_show(QUILL, ICONS, STUDIO_NAME)
+        self.assertNotIn(">Latest Episodes<", out)
+        self.assertNotIn("New episodes will appear here", out)
+        self.assertNotIn("latest-empty", out)
+
+    def test_latest_block_renders_two_items_escaped(self):
+        fake_show = dict(QUILL)
+        fake_show["latest"] = ["Episode One <script>", "Episode & Two"]
+        out = render_show(fake_show, ICONS, STUDIO_NAME)
+        self.assertIn(">Latest Episodes<", out)
+        self.assertIn('class="latest-list"', out)
+        self.assertIn("Episode One &lt;script&gt;", out)
+        self.assertIn("Episode &amp; Two", out)
+        self.assertNotIn("<script>", out)
+
+    def test_watch_block_omitted_when_empty(self):
+        fake_show = dict(QUILL)
+        fake_show["watch"] = []
+        out = render_show(fake_show, ICONS, STUDIO_NAME)
+        self.assertNotIn(">Watch<", out)
+
+    def test_schedule_block_omitted_when_empty(self):
+        fake_show = dict(QUILL)
+        fake_show["cadence"] = []
+        out = render_show(fake_show, ICONS, STUDIO_NAME)
+        self.assertNotIn(">Schedule<", out)
+
 
 if __name__ == "__main__":
     unittest.main()

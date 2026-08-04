@@ -86,8 +86,12 @@ def check_browser(urls):
                 dead_markers = ("page not found", "content isn't available",
                                 "isn't available", "page isn&#x27;t available")
                 looks_dead = any(m in title.lower() for m in dead_markers)
-                ok = 200 <= status < 400 and title != "" and not looks_dead
-                results[url] = (ok, f"browser {status} :: {title[:70]!r}")
+                soft_404 = is_soft_404(url, page.url)
+                ok = 200 <= status < 400 and title != "" and not looks_dead and not soft_404
+                detail = f"browser {status} :: {title[:70]!r}"
+                if soft_404:
+                    detail += f" (soft-404: redirected to site root: {page.url})"
+                results[url] = (ok, detail)
             except Exception as e:      # noqa: BLE001
                 results[url] = (False, f"browser error :: {e}")
             finally:

@@ -26,25 +26,10 @@
    case (The Little Feather) and 9-12:1+ on the two dark bands. Accent
    is only ever a rule, dot, underline or focus outline - never text. */
 
-:root {
-  --paper: #EFE3CC;
-  --paper-ink: #2A2018;
-  --paper-muted: #6B5D48;
-  --studio-amber: #A9782E;
-  --studio-amber-rgb: 169, 120, 46;
-  --wall-deep:  #1B140F;
-  --wall-mid:   #341F13;
-  --wall-glow:  #4A2E1C;
-  --wall-ink:   #F6EAD6;
-  --wall-muted: #C9B79A;
-  --chrome-ink: var(--wall-ink);
-  --chrome-muted: var(--wall-muted);
-  --radius-tile: 26px;
-}
-
-@media (min-width: 768px) {
-  :root { --chrome-ink: var(--paper-ink); --chrome-muted: var(--paper-muted); }
-}
+/* Token :root block lives in css/tokens.css, loaded before this file - do
+   not redeclare it here. A duplicate here previously shadowed edits to
+   tokens.css (site.css loads second and cascade wins), which made
+   tokens.css functionally dead. */
 
 * { box-sizing: border-box; }
 html, body { margin: 0; padding: 0; }
@@ -199,7 +184,14 @@ a { color: inherit; }
   overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0;
 }
 .disc:focus-visible ~ .chapter-grid .opener {
-  outline: 2px solid var(--accent);
+  /* var(--ink), not var(--accent): The Little Feather's accent (#D9A44E) on
+     its own field (#F6EAD6) measures 1.88:1, well under the WCAG 2.2 SC
+     1.4.11 3:1 floor for a non-text UI indicator, and this outline is the
+     ONLY keyboard indicator for the mobile disclosure control. Each show's
+     --ink is already its high-contrast foreground, so this clears 3:1 on
+     all three shows by construction (measured 7.49:1-15.81:1). Do not
+     revert to --accent. */
+  outline: 2px solid var(--ink);
   outline-offset: 3px;
   border-radius: 12px;
 }
@@ -372,7 +364,6 @@ a { color: inherit; }
 .cadence-display { font-family: var(--body-font); font-size: 0.92rem; line-height: 1.45; margin: 0; color: var(--ink); }
 
 .latest-rule { border: none; border-top: 1px solid rgba(var(--accent-rgb), 0.25); margin: 0 0 0.75rem; }
-.latest-empty { font-family: var(--body-font); font-style: italic; font-size: 0.88rem; line-height: 1.5; margin: 0; color: var(--ink); opacity: 0.85; }
 
 .link-list { list-style: none; margin: 0; padding: 0; }
 .link-list li + li { margin-top: 0.55rem; }
