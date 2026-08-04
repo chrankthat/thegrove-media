@@ -41,6 +41,18 @@ def build_hash():
     return h.hexdigest()
 
 
+def asset_url(rel_path):
+    """Content-hashed URL for a static asset.
+
+    _headers caches /css/* for 24h and this Cloudflare token has no purge
+    permission, so an unversioned stylesheet URL means a CSS change does not
+    reach the edge or returning visitors for a day. Hashing the URL makes every
+    edit a new URL, which turns the long TTL from a trap into a benefit.
+    """
+    digest = hashlib.sha256((ROOT / rel_path).read_bytes()).hexdigest()[:8]
+    return f"{rel_path}?v={digest}"
+
+
 def role_label(role, studio_name):
     """Build the eyebrow label for a show's role. Data-driven off `studio_name`
     so a studio rename is a one-line content edit, not a code edit. Only the
@@ -256,8 +268,8 @@ PAGE_HEAD = '''<!doctype html>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400&family=Public+Sans:wght@400;500;600&family=Bree+Serif&family=Nunito+Sans:wght@400;600;700&family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=Spectral:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/tokens.css">
-<link rel="stylesheet" href="css/site.css">
+<link rel="stylesheet" href="{tokens_href}">
+<link rel="stylesheet" href="{site_href}">
 </head>
 <body>
 '''
@@ -329,6 +341,8 @@ def render_page(channels, icons):
         source_hash=source_hash,
         studio_name=esc(studio["name"]),
         show_list=esc(show_list),
+        tokens_href=asset_url("css/tokens.css"),
+        site_href=asset_url("css/site.css"),
     )]
     parts.append(f'<a class="skip-link" href="#{shows[0]["id"]}">Skip to shows</a>')
     parts.append('<div class="page">')

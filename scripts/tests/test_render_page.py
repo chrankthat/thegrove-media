@@ -58,9 +58,23 @@ class TestRenderPage(unittest.TestCase):
         )
 
     def test_css_files_linked_not_tailwind_cdn(self):
-        self.assertIn('href="css/tokens.css"', self.out)
-        self.assertIn('href="css/site.css"', self.out)
+        self.assertIn('href="css/tokens.css?v=', self.out)
+        self.assertIn('href="css/site.css?v=', self.out)
         self.assertNotIn("cdn.tailwindcss.com", self.out)
+
+    def test_css_hrefs_are_content_hashed(self):
+        # _headers caches /css/* for 24h and this Cloudflare token has no
+        # purge permission - the version query string is what makes a CSS
+        # edit actually reach the edge. Confirm both hrefs carry an 8-hex-char
+        # ?v= value, not just the literal prefix.
+        import re
+        for stylesheet in ("css/tokens.css", "css/site.css"):
+            match = re.search(
+                rf'href="{re.escape(stylesheet)}\?v=([0-9a-f]{{8}})"', self.out
+            )
+            self.assertIsNotNone(
+                match, f"expected a hashed ?v= query string on {stylesheet}"
+            )
 
     def test_no_cadence_verified_anywhere_in_full_page(self):
         self.assertNotIn("Verified Aug", self.out)
