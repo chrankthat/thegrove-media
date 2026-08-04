@@ -34,7 +34,8 @@
       "body": "Public Sans",
       "mark": "assets/marks/quill-circle.png",
       "watch": [
-        { "label": "YouTube", "icon": "YouTube", "url": "https://www.youtube.com/@thequill-stories" }
+        { "label": "Latest Story", "icon": null, "url": "https://quill.thegrove.media/WatchLatestStory" },
+        { "label": "YouTube Channel", "icon": "YouTube", "url": "https://www.youtube.com/@thequill-stories" }
       ],
       "listen": [
         { "label": "Spotify", "icon": "Spotify", "url": "https://open.spotify.com/show/033Z9ZjeNm1bOgALYHiYv0" },
@@ -68,7 +69,8 @@
       "body": "Nunito Sans",
       "mark": "assets/marks/tlf-asis.png",
       "watch": [
-        { "label": "YouTube", "icon": "YouTube", "url": "https://www.youtube.com/@thelittlefeatherstories" }
+        { "label": "Latest Story", "icon": null, "url": "https://tlf.thegrove.media/WatchLatestStory" },
+        { "label": "YouTube Channel", "icon": "YouTube", "url": "https://www.youtube.com/@thelittlefeatherstories" }
       ],
       "listen": [
         { "label": "Spotify", "icon": "Spotify", "url": "https://open.spotify.com/show/033Za28dEpdycDW4QES19j" },
@@ -106,7 +108,8 @@
       "body": "Inter",
       "mark": "assets/marks/hitl-circle.png",
       "watch": [
-        { "label": "YouTube", "icon": "YouTube", "url": "https://www.youtube.com/@hitlstream" },
+        { "label": "Next Episode", "icon": null, "url": "https://humanintheloop.stream/live" },
+        { "label": "YouTube Channel", "icon": "YouTube", "url": "https://www.youtube.com/@hitlstream" },
         { "label": "Episode Takeaways", "icon": null, "url": "https://humanintheloop.stream/#resources" }
       ],
       "listen": [
@@ -126,7 +129,7 @@
         { "label": "Instagram", "icon": "Instagram", "url": "https://www.instagram.com/hitlstream/" }
       ],
       "cadence": [
-        { "display": "Live on YouTube every Wednesday at 2 PM ET, 25 minutes.", "source": "humanintheloop.stream", "verified": "2026-08-04" }
+        { "display": "Wednesdays 2pm ET - LIVE on YouTube", "source": "humanintheloop.stream", "verified": "2026-08-04" }
       ],
       "feeds": { "youtube": null, "podcast": "https://rss.humanintheloop.stream/podcast.xml" },
       "latest": []
