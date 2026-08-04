@@ -309,6 +309,7 @@ def render_about(studio):
         about_html = about_html.replace(needle, anchor, 1)
     return f'''    <section id="about" class="about-section">
       <div class="about-card">
+        <p class="about-eyebrow" aria-hidden="true">About</p>
         <div class="colophon small" aria-hidden="true"><span class="rule"></span><span class="dot"></span><span class="rule"></span></div>
         <p class="wordmark small">{esc(studio["name"])}</p>
         <h2 class="sr-only">About {esc(studio["name"])}</h2>

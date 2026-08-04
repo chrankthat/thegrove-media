@@ -65,6 +65,9 @@ class TestRenderPage(unittest.TestCase):
     def test_no_cadence_verified_anywhere_in_full_page(self):
         self.assertNotIn("Verified Aug", self.out)
 
+    def test_about_has_mobile_eyebrow(self):
+        self.assertIn('class="about-eyebrow"', self.out)
+
 
 if __name__ == "__main__":
     unittest.main()

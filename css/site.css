@@ -416,6 +416,21 @@ a { color: inherit; }
   }
 }
 
+.about-eyebrow {
+  display: block;
+  font-family: 'Inter', sans-serif; font-size: 0.72rem;
+  letter-spacing: 0.14em; text-transform: uppercase;
+  /* chrome-muted, NOT studio-amber: Global Constraints forbids accent as a
+     text color, and it's not just the per-show --accent that rule protects
+     - studio-amber on the about-card's #2A1F17 mobile background measures
+     ~4.47:1, a hair under AA's 4.5:1 floor at this caption size. chrome-muted
+     is the same token studio-tagline already uses as text and measures
+     ~9:1 against this background - reuse it, don't add a new text color. */
+  color: var(--chrome-muted); text-align: center;
+  margin: 0 0 0.75rem;
+}
+@media (min-width: 768px) { .about-eyebrow { display: none; } }
+
 .about-card .colophon { display: none; }
 @media (min-width: 768px) { .about-card .colophon { display: flex; } }
 .about-card .wordmark.small { display: none; }
