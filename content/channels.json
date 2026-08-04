@@ -1,0 +1,136 @@
+{
+  "_note": "Single source of truth for every rendered string on the page. Edit here, then run `python3 scripts/render.py` and commit the regenerated index.html together with this file. Cadence `source`/`verified` fields are provenance metadata for a deferred scheduled freshness check; they are deliberately not rendered.",
+  "studio": {
+    "name": "TheGrove Media",
+    "tagline": "The best stories are never about the big thing, but the human moment inside it.",
+    "about": "I'm Chris Shanku. I build real systems for a living and tell true stories on stage - I won a Moth StorySLAM with this one. Technology is best when it enables human connection - period. TheGrove Media is the studio behind Human in the Loop, The Quill, and The Little Feather, a project of TheGrove AI, LLC. More about me at shanku.net, more about the company at thegrove.llc.",
+    "aboutLinks": [
+      { "text": "this one", "url": "https://youtu.be/2Lj3Ujrk2Ys" },
+      { "text": "shanku.net", "url": "https://shanku.net" },
+      { "text": "thegrove.llc", "url": "https://thegrove.llc" }
+    ],
+    "entity": "TheGrove AI, LLC",
+    "badge": "assets/thegrove-media-badge.png",
+    "portrait": "assets/chris-shanku.webp",
+    "links": {
+      "personal": "https://shanku.net",
+      "company": "https://thegrove.llc"
+    }
+  },
+  "shows": [
+    {
+      "id": "the-quill",
+      "order": 1,
+      "name": "The Quill",
+      "tagline": "True Stories, Human-Written.",
+      "blurb": "The Quill tells lost stories - the human moments history skipped over, across wars, eras, and lives. The stories are about the people, not the history.",
+      "extraLine": "My Lost Chapters is the exception - Chris on camera, telling a true story from his own life. No research, no script, no narration.",
+      "role": "produced",
+      "cohost": null,
+      "accent": "#C2643A",
+      "field": "#251E19",
+      "ink": "#E8DFC9",
+      "display": "Fraunces",
+      "body": "Public Sans",
+      "mark": "assets/marks/quill-circle.png",
+      "watch": [
+        { "label": "YouTube", "icon": "YouTube", "url": "https://www.youtube.com/@thequill-stories" }
+      ],
+      "listen": [
+        { "label": "Spotify", "icon": "Spotify", "url": "https://open.spotify.com/show/033Z9ZjeNm1bOgALYHiYv0" },
+        { "label": "Apple Podcasts", "icon": "Apple Podcasts", "url": "https://podcasts.apple.com/us/podcast/the-quill-%7C-bringing-lost-stories-to-life/id6796899950" },
+        { "label": "RSS", "icon": "RSS", "url": "https://rss.thequill.ai/tq/podcast.xml" }
+      ],
+      "socials": [
+        { "label": "Facebook", "icon": "Facebook", "url": "https://www.facebook.com/TheQuillTrueStories" },
+        { "label": "Instagram", "icon": "Instagram", "url": "https://www.instagram.com/TheQuillTrueStories" }
+      ],
+      "cadence": [
+        { "display": "New stories every Sunday, Tuesday, and Friday.", "source": "TheQuill/scheduling/tq-calendar.json", "verified": "2026-08-04" },
+        { "display": "A new My Lost Chapters every month.", "source": "TheQuill/scheduling/mlc-calendar.json", "verified": "2026-08-04" }
+      ],
+      "feeds": { "youtube": null, "podcast": "https://rss.thequill.ai/tq/podcast.xml" },
+      "latest": []
+    },
+    {
+      "id": "the-little-feather",
+      "order": 2,
+      "name": "The Little Feather",
+      "tagline": "Kids Stories for Big Feelings",
+      "blurb": "The Little Feather tells original stories inspired by Pokémon - gentle stories about self-love, emotional regulation, boundaries, leadership, and gratitude.",
+      "extraLine": null,
+      "role": "produced",
+      "cohost": null,
+      "accent": "#D9A44E",
+      "field": "#F6EAD6",
+      "ink": "#5A4633",
+      "display": "Bree Serif",
+      "body": "Nunito Sans",
+      "mark": "assets/marks/tlf-asis.png",
+      "watch": [
+        { "label": "YouTube", "icon": "YouTube", "url": "https://www.youtube.com/@thelittlefeatherstories" }
+      ],
+      "listen": [
+        { "label": "Spotify", "icon": "Spotify", "url": "https://open.spotify.com/show/033Za28dEpdycDW4QES19j" },
+        { "label": "Apple Podcasts", "icon": "Apple Podcasts", "url": "https://podcasts.apple.com/us/podcast/the-little-feather-%7C-short-stories-big-feelings-brave-hearts/id6796899996" },
+        { "label": "RSS", "icon": "RSS", "url": "https://rss.thequill.ai/tlf/podcast.xml" }
+      ],
+      "socials": [
+        { "label": "Facebook", "icon": "Facebook", "url": "https://www.facebook.com/TheLittleFeatherStories" },
+        { "label": "Instagram", "icon": "Instagram", "url": "https://www.instagram.com/TheLittleFeatherStories" }
+      ],
+      "cadence": [
+        { "display": "New stories every Monday, Wednesday, and Saturday.", "source": "TheQuill/scheduling/tlf-calendar.json", "verified": "2026-08-04" }
+      ],
+      "feeds": { "youtube": null, "podcast": "https://rss.thequill.ai/tlf/podcast.xml" },
+      "latest": []
+    },
+    {
+      "id": "human-in-the-loop",
+      "order": 3,
+      "name": "Human in the Loop",
+      "tagline": "Real people. Real tools. No retakes.",
+      "lead": ["Two ex-Microsoft builders.", "One real AI lesson.", "Live every Wednesday."],
+      "blurb": "Echo is the agent. Chris Shanku and Sash Mohapatra are the humans. Every Wednesday, Chris and Sash spend 25 minutes live-demoing real AI tools from their own systems. You see what works and what breaks. Echo does the rest. That's Human in the Loop.",
+      "extraLine": null,
+      "role": "produced",
+      "cohost": {
+        "name": "Sash Mohapatra",
+        "url": "https://buildwithsash.com",
+        "photo": "assets/sash-photo.jpg"
+      },
+      "accent": "#E05A2B",
+      "field": "#121118",
+      "ink": "#F0EBE3",
+      "display": "Space Grotesk",
+      "body": "Inter",
+      "mark": "assets/marks/hitl-circle.png",
+      "watch": [
+        { "label": "YouTube", "icon": "YouTube", "url": "https://www.youtube.com/@hitlstream" },
+        { "label": "Episode Takeaways", "icon": null, "url": "https://humanintheloop.stream/#resources" }
+      ],
+      "listen": [
+        { "label": "Spotify", "icon": "Spotify", "url": "https://open.spotify.com/show/033YvenGJeBSMXduvMmbDv" },
+        { "label": "Apple Podcasts", "icon": "Apple Podcasts", "url": "https://podcasts.apple.com/us/podcast/human-in-the-loop-two-ex-microsoft-builders-on-ai/id6796360726" },
+        { "label": "iHeartRadio", "icon": "iHeartRadio", "url": "https://www.iheart.com/podcast/269-human-in-the-loop-two-ex-m-339927018" },
+        { "label": "Podcast Index", "icon": "Podcast Index", "url": "https://podcastindex.org/podcast/7975515" },
+        { "label": "Castbox", "icon": "Castbox", "url": "https://castbox.fm/vh/7339793" },
+        { "label": "Deezer", "icon": "Deezer", "url": "https://link.deezer.com/s/33YwdkXk0GoN151KVHG7k" },
+        { "label": "TuneIn", "icon": "TuneIn", "url": "https://tun.in/pykrl" },
+        { "label": "Amazon Music", "icon": "Amazon Music", "url": "https://music.amazon.com/podcasts/78d86395-5c08-4e61-abe1-534b371172c7/human-in-the-loop-two-ex-microsoft-builders-on-ai" },
+        { "label": "RSS", "icon": "RSS", "url": "https://rss.humanintheloop.stream/podcast.xml" }
+      ],
+      "socials": [
+        { "label": "LinkedIn", "icon": "LinkedIn", "url": "https://www.linkedin.com/company/humanintheloop" },
+        { "label": "Facebook", "icon": "Facebook", "url": "https://www.facebook.com/HITLstream" },
+        { "label": "Instagram", "icon": "Instagram", "url": "https://www.instagram.com/hitlstream/" }
+      ],
+      "cadence": [
+        { "display": "Live on YouTube every Wednesday at 2 PM ET, 25 minutes.", "source": "humanintheloop.stream", "verified": "2026-08-04" }
+      ],
+      "feeds": { "youtube": null, "podcast": "https://rss.humanintheloop.stream/podcast.xml" },
+      "latest": []
+    }
+  ],
+  "footer": "© 2026 TheGrove AI, LLC"
+}
