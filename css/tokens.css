@@ -1,0 +1,23 @@
+/* Palette + font-family custom properties. Values ported verbatim from
+   docs/design/2026-08-04-thegrove-media/direction-chosen.html - do not
+   re-derive, these were contrast-audited by the designer agent 2026-08-04
+   (worst measured ratio 5.03:1, all pass AA). */
+:root {
+  --paper: #EFE3CC;
+  --paper-ink: #2A2018;
+  --paper-muted: #6B5D48;
+  --studio-amber: #A9782E;
+  --studio-amber-rgb: 169, 120, 46;
+  --wall-deep:  #1B140F;
+  --wall-mid:   #341F13;
+  --wall-glow:  #4A2E1C;
+  --wall-ink:   #F6EAD6;
+  --wall-muted: #C9B79A;
+  --chrome-ink: var(--wall-ink);
+  --chrome-muted: var(--wall-muted);
+  --radius-tile: 26px;
+}
+
+@media (min-width: 768px) {
+  :root { --chrome-ink: var(--paper-ink); --chrome-muted: var(--paper-muted); }
+}

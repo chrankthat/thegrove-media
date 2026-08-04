@@ -18,6 +18,29 @@ CHANNELS_PATH = ROOT / "content" / "channels.json"
 ICONS_PATH = ROOT / "content" / "icons.json"
 OUTPUT_PATH = ROOT / "index.html"
 
+# Every input that can change the rendered page. index.html is NOT an input
+# (it is the output), so there is no circularity. render.py hashes itself so a
+# generator change is detectable live - that is the Task 14 case that a
+# channels.json-only hash silently misses.
+BUILD_INPUTS = [
+    ROOT / "content" / "channels.json",
+    ROOT / "content" / "icons.json",
+    ROOT / "css" / "tokens.css",
+    ROOT / "css" / "site.css",
+    Path(__file__).resolve(),
+]
+
+
+def build_hash():
+    h = hashlib.sha256()
+    for path in BUILD_INPUTS:
+        h.update(path.name.encode("utf-8"))
+        h.update(b"\0")
+        h.update(path.read_bytes())
+        h.update(b"\0")
+    return h.hexdigest()
+
+
 ROLE_LABELS = {"produced": "Produced by TheGrove Media"}
 
 
@@ -197,3 +220,117 @@ def render_show(show, icons):
           </div>
         </div>
       </section>'''
+
+
+PAGE_HEAD = '''<!doctype html>
+<!--
+  GENERATED FILE - DO NOT EDIT DIRECTLY.
+  Source of truth is content/channels.json + content/icons.json + css/.
+  Regenerate with:  python3 scripts/render.py
+  Hand edits here are silently destroyed on the next generator run.
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>TheGrove Media</title>
+<link rel="canonical" href="https://thegrove.media/">
+<meta name="description" content="TheGrove Media - Human in the Loop, The Quill, and The Little Feather.">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta property="og:title" content="TheGrove Media">
+<meta property="og:description" content="TheGrove Media - Human in the Loop, The Quill, and The Little Feather.">
+<meta property="og:image" content="https://thegrove.media/assets/og-image.png">
+<meta property="og:url" content="https://thegrove.media/">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://thegrove.media/assets/og-image.png">
+<meta name="x-thegrove-media-source-sha256" content="{source_hash}">
+<link rel="icon" type="image/png" href="assets/thegrove-media-badge.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400&family=Public+Sans:wght@400;500;600&family=Bree+Serif&family=Nunito+Sans:wght@400;600;700&family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=Spectral:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/tokens.css">
+<link rel="stylesheet" href="css/site.css">
+</head>
+<body>
+'''
+
+PAGE_TAIL = '''
+</body>
+</html>
+'''
+
+
+def render_masthead(studio, shows):
+    nav_links = "".join(
+        f'<a href="#{s["id"]}">{esc(s["name"])}</a><span aria-hidden="true">&middot;</span>'
+        for s in shows
+    ) + '<a href="#about">About</a>'
+    return f'''  <header class="masthead">
+    <div class="masthead-inner">
+      <img class="badge" src="{esc(studio["badge"])}" alt="TheGrove Media studio badge" width="84" height="84" loading="eager">
+      <h1 class="wordmark">{esc(studio["name"])}</h1>
+      <p class="studio-tagline">{esc(studio["tagline"])}</p>
+      <nav class="masthead-nav" aria-label="Shows on this page">
+        {nav_links}
+      </nav>
+    </div>
+  </header>'''
+
+
+def render_about(studio):
+    about_html = esc(studio["about"])
+    for link in studio["aboutLinks"]:
+        needle = esc(link["text"])
+        if about_html.count(needle) != 1:
+            raise ValueError(
+                f'aboutLinks text {link["text"]!r} appears '
+                f'{about_html.count(needle)} times in studio.about; expected exactly 1'
+            )
+        anchor = (f'<a href="{esc(link["url"])}" target="_blank" '
+                  f'rel="noopener noreferrer">{needle}</a>')
+        about_html = about_html.replace(needle, anchor, 1)
+    return f'''    <section id="about" class="about-section">
+      <div class="about-card">
+        <div class="colophon small" aria-hidden="true"><span class="rule"></span><span class="dot"></span><span class="rule"></span></div>
+        <p class="wordmark small">{esc(studio["name"])}</p>
+        <h2 class="sr-only">About {esc(studio["name"])}</h2>
+        <img class="portrait" src="{esc(studio["portrait"])}" alt="Portrait of Chris Shanku" width="128" height="128" loading="lazy">
+        <p class="about-copy">{about_html}</p>
+      </div>
+    </section>'''
+
+
+def render_page(channels, icons):
+    source_hash = build_hash()
+    studio = channels["studio"]
+    shows = sorted(channels["shows"], key=lambda s: s["order"])
+
+    parts = [PAGE_HEAD.format(source_hash=source_hash)]
+    parts.append(f'<a class="skip-link" href="#{shows[0]["id"]}">Skip to shows</a>')
+    parts.append('<div class="page">')
+    parts.append(render_masthead(studio, shows))
+    parts.append('  <main>')
+    parts.append(render_icon_sprite(icons))
+    parts.append('    <div class="stack">')
+    for show in shows:
+        parts.append(render_show(show, icons))
+    parts.append('    </div>')
+    parts.append(render_about(studio))
+    parts.append('  </main>')
+    parts.append(f'  <footer class="site-footer"><p>{esc(channels["footer"])}</p></footer>')
+    parts.append('</div>')
+    parts.append(PAGE_TAIL)
+    return "\n".join(parts)
+
+
+def main():
+    channels = json.loads(CHANNELS_PATH.read_text())
+    icons = json.loads(ICONS_PATH.read_text())
+    page = render_page(channels, icons)
+    OUTPUT_PATH.write_text(page)
+    source_hash = build_hash()
+    print(f"wrote {OUTPUT_PATH} ({len(page)} bytes), source sha256={source_hash}")
+
+
+if __name__ == "__main__":
+    main()

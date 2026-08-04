@@ -1,0 +1,459 @@
+/* =====================================================================
+   TheGrove Media - CHOSEN DIRECTION
+   Direction A's editorial bands (tablet/desktop, >=768px) blended with
+   Direction C's home-screen tiles (mobile, <768px) as ONE responsive
+   page, ONE markup tree. No JavaScript anywhere on this page - the
+   disclosure mechanism is the pure-CSS "checkbox hack": a visually
+   hidden (but still focusable/tabbable) checkbox drives a sibling
+   selector that shows/hides .panel and .sidebar on mobile, and that
+   same rule is unconditionally overridden back to display:block at
+   the desktop breakpoint. Content is always in the DOM either way, so
+   it is correct and fully linked whether or not JS runs - and here,
+   nothing ever runs.
+
+   .show is the single repeatable component (tile on mobile, band on
+   desktop) driven entirely by inline custom properties per <section>:
+   --field / --ink / --accent / --accent-rgb / --display / --body-font.
+   A fourth show is a fourth <section class="show">, nothing more.
+
+   Contrast note (see accompanying summary for the worked numbers):
+   each show's `muted` token from channels.json fails AA at caption
+   size on at least one field (The Little Feather ~3.6:1, Human in the
+   Loop ~3.6:1) - so `muted` is declared for data parity but never
+   consumed as a text color anywhere in this file. All reader text,
+   including the smallest captions (schedule lines, "Verified Aug 4"),
+   uses each band's full `ink` value, which clears 7.4:1 at its worst
+   case (The Little Feather) and 9-12:1+ on the two dark bands. Accent
+   is only ever a rule, dot, underline or focus outline - never text. */
+
+:root {
+  --paper: #EFE3CC;
+  --paper-ink: #2A2018;
+  --paper-muted: #6B5D48;
+  --studio-amber: #A9782E;
+  --studio-amber-rgb: 169, 120, 46;
+  --wall-deep:  #1B140F;
+  --wall-mid:   #341F13;
+  --wall-glow:  #4A2E1C;
+  --wall-ink:   #F6EAD6;
+  --wall-muted: #C9B79A;
+  --chrome-ink: var(--wall-ink);
+  --chrome-muted: var(--wall-muted);
+  --radius-tile: 26px;
+}
+
+@media (min-width: 768px) {
+  :root { --chrome-ink: var(--paper-ink); --chrome-muted: var(--paper-muted); }
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+  background:
+    radial-gradient(120% 60% at 85% -10%, rgba(217,164,78,0.18), transparent 60%),
+    linear-gradient(165deg, var(--wall-deep) 0%, var(--wall-mid) 45%, var(--wall-glow) 78%, #241610 100%);
+  background-attachment: fixed;
+  color: var(--chrome-ink);
+  -webkit-font-smoothing: antialiased;
+}
+@media (min-width: 768px) {
+  body { background: var(--paper); }
+}
+
+a { color: inherit; }
+
+:focus-visible {
+  outline: 2px solid rgba(var(--studio-amber-rgb), 0.9);
+  outline-offset: 3px;
+}
+
+.sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+}
+
+.skip-link {
+  position: absolute; left: -9999px; top: 0;
+  background: var(--paper-ink); color: var(--paper);
+  padding: 0.75rem 1.25rem; z-index: 50; font-size: 0.875rem;
+}
+.skip-link:focus { left: 1rem; top: 1rem; }
+
+/* ---- page wrapper: mobile = phone-width column; desktop = unconstrained ---- */
+.page { max-width: 430px; margin-inline: auto; padding-inline: 16px; }
+@media (min-width: 768px) {
+  .page { max-width: none; padding-inline: 0; }
+}
+
+/* ---- colophon / wordmark: the studio's only mark, both breakpoints ---- */
+.colophon {
+  display: flex; align-items: center; justify-content: center;
+  gap: 0.75rem; margin-bottom: 1.25rem;
+}
+.colophon .rule {
+  display: block; width: clamp(2rem, 6vw, 3.5rem); height: 1px;
+  background: rgba(var(--studio-amber-rgb), 0.55);
+}
+.colophon .dot {
+  display: block; width: 6px; height: 6px; border-radius: 999px;
+  background: var(--studio-amber); flex: none;
+}
+.colophon.small .rule { width: clamp(1.5rem, 4vw, 2.5rem); }
+
+.badge {
+  display: block; margin: 0 auto 1rem;
+  width: 56px; height: 56px; object-fit: contain;
+}
+@media (min-width: 768px) {
+  .badge { width: clamp(60px, 6vw, 84px); height: clamp(60px, 6vw, 84px); margin-bottom: 1.25rem; }
+}
+
+.wordmark {
+  font-family: 'Spectral', serif; font-weight: 600; letter-spacing: 0.01em;
+  font-size: clamp(1.5rem, 5vw, 2rem);
+  text-align: center; margin: 0;
+  color: var(--chrome-ink);
+}
+@media (min-width: 768px) {
+  .wordmark { font-size: clamp(1.75rem, 3vw + 1rem, 2.5rem); }
+}
+.wordmark.small { font-size: clamp(1.15rem, 2vw + 0.75rem, 1.5rem); }
+
+.studio-tagline {
+  font-family: 'Spectral', serif; font-style: italic;
+  font-size: clamp(1rem, 1vw + 0.85rem, 1.15rem);
+  color: var(--chrome-muted);
+  text-align: center;
+  margin: 0.6rem auto 0;
+  max-width: 40ch;
+  text-wrap: balance;
+}
+
+/* ---- masthead ---- */
+.masthead { padding: 32px 0 24px; }
+@media (min-width: 768px) {
+  .masthead { padding: clamp(3rem, 8vw, 5rem) 1.25rem clamp(2.5rem, 6vw, 3.5rem); }
+}
+.masthead-inner { max-width: 640px; margin-inline: auto; }
+
+.masthead-nav {
+  display: none;
+  flex-wrap: wrap; justify-content: center; align-items: center;
+  gap: 0.6rem 0.85rem;
+  font-family: 'Inter', sans-serif; font-size: 0.8rem;
+  letter-spacing: 0.06em; text-transform: uppercase;
+  color: var(--chrome-muted);
+  margin-top: 1.75rem;
+}
+@media (min-width: 768px) { .masthead-nav { display: flex; } }
+.masthead-nav a { text-decoration: none; border-bottom: 1px solid transparent; padding-bottom: 2px; }
+.masthead-nav a:hover, .masthead-nav a:focus-visible { border-bottom-color: rgba(var(--studio-amber-rgb), 0.7); }
+.masthead-nav span { opacity: 0.5; }
+
+/* ---- stack: mobile = gapped tile column; desktop = edge-to-edge bands ---- */
+.stack { margin-top: 18px; display: flex; flex-direction: column; gap: 14px; }
+@media (min-width: 768px) {
+  .stack { margin-top: 0; display: block; gap: 0; }
+}
+
+/* ---- show: ONE component, tile (mobile) or band (desktop) ---- */
+.show {
+  background: var(--field);
+  color: var(--ink);
+  border-radius: var(--radius-tile);
+  box-shadow: 0 10px 24px -12px rgba(0,0,0,0.5);
+  overflow: hidden;
+}
+@media (min-width: 768px) {
+  .show {
+    border-radius: 0;
+    box-shadow: none;
+    padding-block: clamp(3.5rem, 9vw, 7.5rem);
+  }
+}
+
+.chapter-inner { position: relative; }
+@media (min-width: 768px) {
+  .chapter-inner { max-width: 1180px; margin-inline: auto; padding-inline: clamp(1.25rem, 5vw, 3rem); }
+}
+
+.chapter-grid { display: block; }
+@media (min-width: 768px) {
+  .chapter-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(240px, 300px);
+    gap: clamp(2.5rem, 6vw, 4.5rem);
+    align-items: start;
+  }
+}
+
+.chapter-main { text-align: left; }
+@media (min-width: 768px) { .chapter-main { text-align: center; } }
+
+/* ---- the disclosure checkbox: visually hidden, NOT display:none, so it
+   stays tabbable and Space toggles it with zero JavaScript. ---- */
+.disc {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+}
+.disc:focus-visible ~ .chapter-grid .opener {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: 12px;
+}
+
+/* mobile: collapsed by default */
+.disc:not(:checked) ~ .chapter-grid .panel,
+.disc:not(:checked) ~ .chapter-grid .sidebar { display: none; }
+
+/* desktop: unconditionally open, the checkbox becomes inert chrome */
+@media (min-width: 768px) {
+  .chapter-grid .panel,
+  .chapter-grid .sidebar { display: block !important; }
+}
+
+/* ---- opener: mark + eyebrow + name + tagline. Row-with-chevron on
+   mobile (the tap target); centered chapter-opener on desktop. ---- */
+.opener {
+  display: flex; align-items: center; gap: 14px;
+  padding: 16px; cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+@media (min-width: 768px) {
+  .opener { display: block; padding: 0; cursor: default; }
+}
+
+.mark-wrap {
+  flex: none; width: 56px; height: 56px;
+  display: flex; align-items: center; justify-content: center;
+}
+@media (min-width: 768px) {
+  .mark-wrap {
+    width: clamp(84px, 9vw, 116px); height: clamp(84px, 9vw, 116px);
+    margin: 0 auto 1.75rem;
+  }
+}
+.mark { width: 100%; height: 100%; object-fit: contain; display: block; }
+
+.eyebrow {
+  display: none;
+  font-family: var(--body-font); font-size: 0.75rem;
+  letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--ink); margin: 0 0 0.9rem;
+}
+@media (min-width: 768px) { .eyebrow { display: block; } }
+
+.opener-text { flex: 1; min-width: 0; }
+.tile-name {
+  font-family: var(--display);
+  font-weight: 600;
+  color: var(--ink);
+  display: block;
+  font-size: 1.05rem;
+  line-height: 1.25;
+}
+@media (min-width: 768px) {
+  .tile-name {
+    font-size: clamp(2.1rem, 3vw + 1.4rem, 3.4rem);
+    line-height: 1.05;
+    margin: 0 0 0.6rem;
+  }
+}
+.tile-tagline {
+  font-family: var(--body-font); font-style: italic; font-weight: 400;
+  color: var(--ink); opacity: 0.85;
+  display: block;
+  font-size: 0.88rem;
+  margin-top: 2px;
+}
+@media (min-width: 768px) {
+  .tile-tagline {
+    font-family: var(--display);
+    font-size: clamp(1.05rem, 0.5vw + 0.95rem, 1.25rem);
+    margin: 0 0 1.75rem;
+  }
+}
+
+.chevron {
+  flex: none; width: 20px; height: 20px; color: var(--ink); opacity: 0.6;
+  transition: transform 0.18s ease;
+}
+.disc:checked ~ .chapter-grid .chevron { transform: rotate(180deg); }
+@media (min-width: 768px) { .chevron { display: none; } }
+
+/* ---- panel: blurb / lead / extra-line / cohost ---- */
+.panel { padding: 0 16px 20px; }
+@media (min-width: 768px) { .panel { padding: 0; } }
+
+.lead-lines { margin: 0 0 1rem; }
+.lead-lines p {
+  font-family: var(--display); font-weight: 600;
+  font-size: 1.05rem; line-height: 1.3; margin: 0;
+  color: var(--ink);
+}
+@media (min-width: 768px) {
+  .lead-lines p { font-size: clamp(1.2rem, 1vw + 1rem, 1.5rem); }
+}
+
+.chapter-blurb {
+  font-family: var(--body-font);
+  font-size: 0.96rem; line-height: 1.6;
+  margin: 0;
+  color: var(--ink);
+}
+@media (min-width: 768px) {
+  .chapter-blurb {
+    font-size: clamp(1rem, 0.3vw + 0.95rem, 1.08rem);
+    line-height: 1.7;
+    max-width: 34rem; margin-inline: auto;
+    /* Left-aligned, deliberately. justify was measured producing visible rivers
+       (word gaps 2-3x normal) in the ~405-432px column the band yields between
+       768px and 900px. Do not reintroduce justify in a later CSS pass. */
+    text-align: left;
+  }
+}
+
+.extra-line {
+  font-family: var(--body-font); font-size: 0.85em; line-height: 1.55;
+  color: var(--ink); opacity: 0.85;
+  margin: 0.85rem 0 0;
+}
+@media (min-width: 768px) { .extra-line { max-width: 34rem; margin-inline: auto; } }
+
+.cohost-credit {
+  display: flex; align-items: center; gap: 0.6rem;
+  margin: 1rem 0 0;
+  font-family: var(--body-font); font-size: 0.92rem; color: var(--ink);
+}
+@media (min-width: 768px) { .cohost-credit { justify-content: center; margin-top: 1.5rem; } }
+.cohost-photo {
+  flex: none; width: 32px; height: 32px; border-radius: 999px;
+  object-fit: cover; border: 1.5px solid rgba(var(--accent-rgb), 0.5);
+}
+.cohost-credit a {
+  text-decoration: underline;
+  text-decoration-color: rgba(var(--accent-rgb), 0.75);
+  text-underline-offset: 3px; text-decoration-thickness: 1px;
+}
+.cohost-credit a:hover, .cohost-credit a:focus-visible { text-decoration-thickness: 2px; }
+
+/* ---- sidebar: mobile = stacked below panel, top-ruled; desktop = a
+   left-ruled marginalia column beside chapter-main. ---- */
+.sidebar {
+  text-align: left;
+  padding: 4px 16px 20px;
+  border-top: 1px solid rgba(var(--accent-rgb), 0.35);
+}
+@media (min-width: 768px) {
+  .sidebar {
+    padding: 0 0 0 clamp(2rem, 3vw, 3rem);
+    border-top: none;
+    border-left: 1px solid rgba(var(--accent-rgb), 0.4);
+  }
+}
+
+.sidebar-block { padding-top: 1.5rem; }
+.sidebar-block + .sidebar-block {
+  margin-top: 1.5rem;
+  border-top: 1px solid rgba(var(--accent-rgb), 0.2);
+}
+
+.sidebar-label {
+  display: flex; align-items: center; gap: 0.55rem;
+  font-family: var(--body-font); font-size: 0.72rem;
+  letter-spacing: 0.13em; text-transform: uppercase;
+  color: var(--ink); margin: 0 0 0.9rem;
+}
+.sidebar-label .dot { width: 5px; height: 5px; border-radius: 999px; background: var(--accent); flex: none; }
+
+.cadence-entry + .cadence-entry { margin-top: 0.9rem; }
+.cadence-display { font-family: var(--body-font); font-size: 0.92rem; line-height: 1.45; margin: 0; color: var(--ink); }
+
+.latest-rule { border: none; border-top: 1px solid rgba(var(--accent-rgb), 0.25); margin: 0 0 0.75rem; }
+.latest-empty { font-family: var(--body-font); font-style: italic; font-size: 0.88rem; line-height: 1.5; margin: 0; color: var(--ink); opacity: 0.85; }
+
+.link-list { list-style: none; margin: 0; padding: 0; }
+.link-list li + li { margin-top: 0.55rem; }
+.link-list a {
+  font-family: var(--body-font); font-size: 0.92rem; color: var(--ink);
+  text-decoration: underline;
+  text-decoration-color: rgba(var(--accent-rgb), 0.7);
+  text-underline-offset: 3px; text-decoration-thickness: 1px;
+}
+.link-list a:hover, .link-list a:focus-visible { text-decoration-thickness: 2px; }
+
+/* ---- icon rows: Listen / Socials, icons only, 44x44 min tap target ---- */
+.icon-row { display: flex; flex-wrap: wrap; gap: 4px; margin: 0; padding: 0; list-style: none; }
+.icon-link {
+  width: 44px; height: 44px; border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  transition: background-color 0.15s ease;
+}
+.icon-link:hover, .icon-link:focus-visible { background: rgba(var(--accent-rgb), 0.16); }
+.icon { width: 20px; height: 20px; fill: currentColor; color: var(--ink); display: block; }
+
+/* ---- about: last thing before the footer, both breakpoints.
+   Mobile: same width + radius as the show tiles, always expanded.
+   Desktop: Direction A's quiet closing page - no card, no border. ---- */
+.about-section { margin-top: 14px; }
+@media (min-width: 768px) { .about-section { margin-top: 0; padding: clamp(4rem, 9vw, 6.5rem) 1.25rem; } }
+
+.about-card {
+  background: #2A1F17;
+  color: var(--wall-ink);
+  border-radius: var(--radius-tile);
+  padding: 24px 20px 28px;
+  box-shadow: 0 10px 24px -12px rgba(0,0,0,0.5);
+  text-align: center;
+}
+@media (min-width: 768px) {
+  .about-card {
+    background: transparent; color: var(--paper-ink);
+    box-shadow: none; border-radius: 0; padding: 0;
+    max-width: 34rem; margin-inline: auto;
+  }
+}
+
+.about-card .colophon { display: none; }
+@media (min-width: 768px) { .about-card .colophon { display: flex; } }
+.about-card .wordmark.small { display: none; }
+@media (min-width: 768px) { .about-card .wordmark.small { display: block; } }
+
+.portrait {
+  display: block; margin: 0 auto 1.25rem;
+  width: 72px; height: 72px; border-radius: 999px; object-fit: cover;
+  box-shadow: 0 0 0 1px rgba(var(--studio-amber-rgb), 0.55), 0 0 0 4px rgba(0,0,0,0.15);
+}
+@media (min-width: 768px) {
+  .portrait {
+    width: clamp(88px, 10vw, 128px); height: clamp(88px, 10vw, 128px);
+    margin: 0.5rem auto 2rem;
+    box-shadow: 0 0 0 1px rgba(var(--studio-amber-rgb), 0.55), 0 0 0 5px var(--paper), 0 0 0 6px rgba(var(--studio-amber-rgb), 0.28);
+  }
+}
+
+.about-copy {
+  font-family: 'Spectral', serif;
+  font-size: 0.98rem; line-height: 1.65;
+  color: inherit; margin: 0;
+}
+@media (min-width: 768px) { .about-copy { font-size: clamp(1.05rem, 0.4vw + 1rem, 1.2rem); line-height: 1.75; } }
+.about-copy a {
+  text-decoration: underline;
+  text-decoration-color: rgba(var(--studio-amber-rgb), 0.75);
+  text-underline-offset: 3px;
+}
+.about-copy a:hover, .about-copy a:focus-visible { text-decoration-thickness: 2px; }
+
+/* ---- footer ---- */
+.site-footer { padding: 22px 0 40px; text-align: center; }
+@media (min-width: 768px) { .site-footer { padding: 1.75rem 1.25rem 2.5rem; border-top: 1px solid rgba(var(--studio-amber-rgb), 0.3); } }
+.site-footer p { font-family: 'Inter', sans-serif; font-size: 0.78rem; letter-spacing: 0.03em; color: var(--chrome-muted); margin: 0; }
+
+/* ---- motion: hover/focus micro-interactions only. Nothing ever starts
+   hidden, nothing waits on JS to reveal itself. ---- */
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; }
+}
