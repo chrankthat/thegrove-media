@@ -28,13 +28,31 @@ BUILD_INPUTS = [
     ROOT / "css" / "tokens.css",
     ROOT / "css" / "site.css",
     Path(__file__).resolve(),
+    # Image bytes are build inputs too. Without them, swapping a mark or photo
+    # leaves the digest unchanged, so verify_deploy.py prints PASS against the
+    # PREVIOUS deploy - the same false-green class the sprint review caught when
+    # the digest covered channels.json alone. Proved 2026-08-05: a new
+    # hitl-circle.png on disk produced a byte-identical local and live hash.
+    # Sorted for a deterministic digest; `rglob` so a new asset is covered the
+    # day it lands rather than the day someone remembers to list it here.
+    # Extension-allowlisted on purpose: a bare `*.*` would sweep in a
+    # Finder-created .DS_Store and make the digest machine-dependent, which
+    # fails the deploy gate for a reason that has nothing to do with the deploy.
+    *sorted(
+        p for p in (ROOT / "assets").rglob("*")
+        if p.is_file()
+        and not p.name.startswith(".")
+        and p.suffix.lower() in {".png", ".jpg", ".jpeg", ".webp", ".svg", ".ico"}
+    ),
 ]
 
 
 def build_hash():
     h = hashlib.sha256()
     for path in BUILD_INPUTS:
-        h.update(path.name.encode("utf-8"))
+        # Repo-relative path, not bare name: assets/ is now globbed recursively,
+        # so two inputs can share a filename across directories.
+        h.update(path.relative_to(ROOT).as_posix().encode("utf-8"))
         h.update(b"\0")
         h.update(path.read_bytes())
         h.update(b"\0")
@@ -48,6 +66,12 @@ def asset_url(rel_path):
     permission, so an unversioned stylesheet URL means a CSS change does not
     reach the edge or returning visitors for a day. Hashing the URL makes every
     edit a new URL, which turns the long TTL from a trap into a benefit.
+
+    Images need this MORE than CSS, not less: /assets/* is
+    `max-age=31536000, immutable`, so an unversioned image URL means a swapped
+    mark or photo never reaches a returning visitor or the edge at all. Proved
+    live 2026-08-05 on assets/marks/hitl-circle.png - cf-cache-status HIT,
+    age 32178, against a file that had already changed on disk.
     """
     digest = hashlib.sha256((ROOT / rel_path).read_bytes()).hexdigest()[:8]
     return f"{rel_path}?v={digest}"
@@ -183,7 +207,7 @@ def render_show(show, icons, studio_name):
         c = show["cohost"]
         cohost_html = (
             '<div class="cohost-credit">'
-            f'<img class="cohost-photo" src="{esc(c["photo"])}" alt="Photo of {esc(c["name"])}" '
+            f'<img class="cohost-photo" src="{esc(asset_url(c["photo"]))}" alt="Photo of {esc(c["name"])}" '
             'width="32" height="32" loading="lazy">'
             f'<p>Co-hosted with <a href="{esc(c["url"])}" target="_blank" '
             f'rel="noopener noreferrer">{esc(c["name"])}</a></p></div>'
@@ -235,7 +259,7 @@ def render_show(show, icons, studio_name):
           <div class="chapter-grid">
             <div class="chapter-main">
               <label for="disc-{show_id}" class="opener">
-                <span class="mark-wrap" aria-hidden="true"><img class="mark" src="{esc(show["mark"])}" alt="" width="116" height="116" loading="lazy"></span>
+                <span class="mark-wrap" aria-hidden="true"><img class="mark" src="{esc(asset_url(show["mark"]))}" alt="" width="116" height="116" loading="lazy"></span>
                 <span class="eyebrow">{esc(eyebrow)}</span>
                 <span class="opener-text">
                   <span class="tile-name" role="heading" aria-level="2">{esc(show["name"])}</span>
@@ -282,7 +306,7 @@ PAGE_HEAD = '''<!doctype html>
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="https://thegrove.media/assets/og-image.png">
 <meta name="x-thegrove-media-source-sha256" content="{source_hash}">
-<link rel="icon" type="image/png" href="assets/thegrove-media-badge.png">
+<link rel="icon" type="image/png" href="{favicon_href}">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400&family=Public+Sans:wght@400;500;600&family=Bree+Serif&family=Nunito+Sans:wght@400;600;700&family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=Spectral:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap" rel="stylesheet">
@@ -315,7 +339,7 @@ def render_masthead(studio, shows):
     ) + '<a href="#about">About</a>'
     return f'''  <header class="masthead">
     <div class="masthead-inner">
-      <img class="badge" src="{esc(studio["badge"])}" alt="{esc(studio["name"])} badge" width="84" height="84" loading="eager">
+      <img class="badge" src="{esc(asset_url(studio["badge"]))}" alt="{esc(studio["name"])} badge" width="84" height="84" loading="eager">
       <h1 class="wordmark">{esc(studio["name"])}</h1>
       <p class="studio-tagline">{esc(studio["tagline"])}</p>
       <nav class="masthead-nav" aria-label="Shows on this page">
@@ -349,7 +373,7 @@ def render_about(studio):
         <div class="colophon small" aria-hidden="true"><span class="rule"></span><span class="dot"></span><span class="rule"></span></div>
         <p class="wordmark small">{esc(studio["name"])}</p>
         <h2 class="sr-only">About {esc(studio["name"])}</h2>
-        <img class="portrait" src="{esc(studio["portrait"])}" alt="Portrait of Chris Shanku" width="128" height="128" loading="lazy">
+        <img class="portrait" src="{esc(asset_url(studio["portrait"]))}" alt="Portrait of Chris Shanku" width="128" height="128" loading="lazy">
         <p class="about-copy">{about_html}</p>
       </div>
     </section>'''
@@ -367,6 +391,7 @@ def render_page(channels, icons):
         show_list=esc(show_list),
         tokens_href=asset_url("css/tokens.css"),
         site_href=asset_url("css/site.css"),
+        favicon_href=asset_url("assets/thegrove-media-badge.png"),
     )]
     parts.append(f'<a class="skip-link" href="#{shows[0]["id"]}">Skip to shows</a>')
     parts.append('<div class="page">')
