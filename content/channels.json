@@ -109,7 +109,7 @@
       "mark": "assets/marks/hitl-circle.png",
       "watch": [
         { "label": "Next Episode", "icon": null, "url": "https://humanintheloop.stream/live" },
-        { "label": "YouTube Channel", "icon": "YouTube", "url": "https://www.youtube.com/@hitlstream" },
+        { "label": "YouTube Channel", "icon": "YouTube", "url": "https://www.youtube.com/@humanintheloop.stream" },
         { "label": "Episode Takeaways", "icon": null, "url": "https://humanintheloop.stream/#resources" }
       ],
       "listen": [
@@ -124,9 +124,8 @@
         { "label": "RSS", "icon": "RSS", "url": "https://rss.humanintheloop.stream/podcast.xml" }
       ],
       "socials": [
-        { "label": "LinkedIn", "icon": "LinkedIn", "url": "https://www.linkedin.com/company/humanintheloop" },
-        { "label": "Facebook", "icon": "Facebook", "url": "https://www.facebook.com/HITLstream" },
-        { "label": "Instagram", "icon": "Instagram", "url": "https://www.instagram.com/hitlstream/" }
+        { "label": "Facebook", "icon": "Facebook", "url": "https://www.facebook.com/HumanInTheLoopStream" },
+        { "label": "Instagram", "icon": "Instagram", "url": "https://www.instagram.com/humanintheloop.stream" }
       ],
       "cadence": [
         { "display": "Wednesdays 2pm ET - LIVE on YouTube", "source": "humanintheloop.stream", "verified": "2026-08-04" }

@@ -76,13 +76,19 @@ class TestRenderShow(unittest.TestCase):
 
     def test_watch_renders_as_text_links_not_icons(self):
         out = render_show(HITL, ICONS, STUDIO_NAME)
-        self.assertIn('<a href="https://www.youtube.com/@hitlstream"', out)
+        self.assertIn('<a href="https://www.youtube.com/@humanintheloop.stream"', out)
         self.assertIn("Episode Takeaways", out)
 
     def test_linkedin_is_not_labelled_a_placeholder(self):
         # LinkedIn carries a provenance `note` but IS an official mark. Keying
         # the placeholder disclosure off `note` mislabelled it. FOLD-1/FOLD-5.
-        out = render_show(HITL, ICONS, STUDIO_NAME)
+        # No show links LinkedIn as of 2026-08-05, so build one synthetically -
+        # the regression is in render_show, not in the data.
+        fake_show = dict(HITL)
+        fake_show["socials"] = [
+            {"label": "LinkedIn", "icon": "LinkedIn", "url": "https://www.linkedin.com/company/example"}
+        ]
+        out = render_show(fake_show, ICONS, STUDIO_NAME)
         self.assertIn('title="LinkedIn"', out)
         self.assertNotIn("LinkedIn (generic icon)", out)
 
