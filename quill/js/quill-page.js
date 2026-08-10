@@ -30,6 +30,16 @@
     return d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
   }
 
+  // Formats never linked a fourth show format to this page; fall back to the
+  // raw value rather than rendering the literal string "undefined".
+  function formatLabel(fmt) {
+    return Object.prototype.hasOwnProperty.call(FORMAT_LABEL, fmt) ? FORMAT_LABEL[fmt] : fmt;
+  }
+
+  function formatIcon(fmt) {
+    return Object.prototype.hasOwnProperty.call(FORMAT_ICON, fmt) ? FORMAT_ICON[fmt] : "";
+  }
+
   function cornerMarkup() {
     const tpl = document.getElementById("corner-svg-template").innerHTML;
     return ["tl", "tr", "bl", "br"].map(function (pos) {
@@ -50,19 +60,23 @@
       latestCard.closest("section").remove();
       return;
     }
+    const viewsText = formatViews(ep.view_count);
+    const viewsBlock = viewsText
+      ? '<div class="hero-views">' +
+          '<span class="ember-dot" aria-hidden="true"></span><span>' + esc(viewsText) + "</span>" +
+        "</div>"
+      : "";
     latestCard.innerHTML =
       cornerMarkup() +
       thumbHtml(ep, "hero-thumb") +
       '<div class="hero-meta-row">' +
         '<span class="format-pill" data-format="' + esc(ep.format) + '">' +
-          FORMAT_ICON[ep.format] + "<span>" + esc(FORMAT_LABEL[ep.format]) + "</span>" +
+          formatIcon(ep.format) + "<span>" + esc(formatLabel(ep.format)) + "</span>" +
         "</span>" +
         '<span class="tagline">' + esc(formatDate(ep.published_at)) + "</span>" +
       "</div>" +
       '<h3 class="font-display hero-title">' + esc(ep.title) + "</h3>" +
-      '<div class="hero-views">' +
-        '<span class="ember-dot" aria-hidden="true"></span><span>' + esc(formatViews(ep.view_count)) + "</span>" +
-      "</div>";
+      viewsBlock;
   }
 
   function renderPopular(episodes) {
@@ -70,13 +84,17 @@
     episodes.forEach(function (ep) {
       const card = document.createElement("article");
       card.className = "frame popular-card";
+      const viewsText = formatViews(ep.view_count);
+      const viewsBlock = viewsText
+        ? '<div class="card-views">' +
+            '<span class="ember-dot" aria-hidden="true"></span><span>' + esc(viewsText) + "</span>" +
+          "</div>"
+        : "";
       card.innerHTML =
         cornerMarkup() +
         thumbHtml(ep, "card-thumb") +
         '<h3 class="font-display card-title">' + esc(ep.title) + "</h3>" +
-        '<div class="card-views">' +
-          '<span class="ember-dot" aria-hidden="true"></span><span>' + esc(formatViews(ep.view_count)) + "</span>" +
-        "</div>";
+        viewsBlock;
       wrap.appendChild(card);
     });
   }
@@ -90,16 +108,18 @@
       row.rel = "noopener noreferrer";
       row.dataset.format = ep.format;
       row.className = "episode-row tap";
+      const viewsText = formatViews(ep.view_count);
+      const metaText = esc(formatDate(ep.published_at)) + (viewsText ? " &middot; " + esc(viewsText) : "");
       row.innerHTML =
         thumbHtml(ep, "row-thumb") +
         '<div class="row-body">' +
           '<div class="row-title-line">' +
             '<h3 class="font-display row-title">' + esc(ep.title) + "</h3>" +
             '<span class="format-pill" data-format="' + esc(ep.format) + '">' +
-              FORMAT_ICON[ep.format] + "<span>" + esc(FORMAT_LABEL[ep.format]) + "</span>" +
+              formatIcon(ep.format) + "<span>" + esc(formatLabel(ep.format)) + "</span>" +
             "</span>" +
           "</div>" +
-          '<p class="row-meta">' + esc(formatDate(ep.published_at)) + " &middot; " + esc(formatViews(ep.view_count)) + "</p>" +
+          '<p class="row-meta">' + metaText + "</p>" +
         "</div>";
       listWrap.appendChild(row);
     });
@@ -133,13 +153,26 @@
     applyFilter();
   }
 
-  function renderError() {
+  // Reached from two different failure shapes: a genuinely empty catalog
+  // (episodes.length === 0) and a fetch/parse failure (bad response, 5xx,
+  // network error, malformed JSON) caught below. Those are not the same
+  // claim - "nothing published yet" is true in the first case and false in
+  // the second - so isFetchFailure picks the honest copy for each. Same
+  // "absent section is honest" rule as renderLatestCard/renderPopular: also
+  // drops the filter chips, since wireFilter() never ran to give them
+  // handlers and three inert buttons over an error message is its own
+  // small dishonesty.
+  function renderError(isFetchFailure) {
     document.getElementById("latest-section").remove();
     document.querySelectorAll("section").forEach(function (section) {
       if (section.querySelector("#popular-scroll")) section.remove();
+      if (section.querySelector(".filter-row")) section.remove();
     });
+    const message = isFetchFailure
+      ? "Couldn't load stories right now - check back soon, or find us on "
+      : "Stories are on the way - check back soon, or find us on ";
     document.getElementById("episode-list").insertAdjacentHTML("beforeend",
-      '<p class="tagline">Stories are on the way - check back soon, or find us on '
+      '<p class="tagline">' + message
       + '<a href="https://www.youtube.com/@thequilltruestories" style="color:#D97C4E">YouTube</a>.</p>');
   }
 
@@ -150,7 +183,7 @@
     })
     .then(function (episodes) {
       if (episodes.length === 0) {
-        renderError();
+        renderError(false);
         return;
       }
       const latest = episodes.slice().sort(function (a, b) {
@@ -158,10 +191,22 @@
       })[0];
       renderLatestCard(latest);
 
-      const popular = episodes.slice().sort(function (a, b) {
-        return (b.view_count ?? -1) - (a.view_count ?? -1);
-      }).slice(0, 3);
-      renderPopular(popular);
+      // "Most Popular" is a ranking claim. If every episode has a null/
+      // undefined view_count (e.g. the daily view-count refresh hasn't run
+      // yet), there is no real ranking to show - sort() would just return
+      // the stable input order (published_at DESC) under a label asserting
+      // it's popularity-ordered. Drop the section rather than ship that.
+      const hasViewData = episodes.some(function (ep) {
+        return ep.view_count !== null && ep.view_count !== undefined;
+      });
+      if (hasViewData) {
+        const popular = episodes.slice().sort(function (a, b) {
+          return (b.view_count ?? -1) - (a.view_count ?? -1);
+        }).slice(0, 3);
+        renderPopular(popular);
+      } else {
+        document.getElementById("popular-scroll").closest("section").remove();
+      }
 
       const byLatest = episodes.slice().sort(function (a, b) {
         return new Date(b.published_at) - new Date(a.published_at);
@@ -171,6 +216,6 @@
       wireFilter();
     })
     .catch(function () {
-      renderError();
+      renderError(true);
     });
 })();
