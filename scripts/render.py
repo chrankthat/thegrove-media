@@ -59,13 +59,13 @@ BUILD_INPUTS = [
     # Extension-allowlisted on purpose: a bare `*.*` would sweep in a
     # Finder-created .DS_Store and make the digest machine-dependent, which
     # fails the deploy gate for a reason that has nothing to do with the deploy.
-    # quill/assets is swept alongside the root assets dir: the quill page
-    # carries its own copy of the mark because the hostname middleware breaks
-    # root-absolute asset URLs on quill.thegrove.media (see quill/index.html),
-    # and an image the deploy gate cannot see is the same false-green class
-    # this list exists to close.
+    # quill/assets is swept alongside the root assets dir. It does not exist
+    # today - the quill page's mark resolves to the ROOT /assets copy via the
+    # middleware's unprefixed fallback - so the sweep is guarded on exists().
+    # It stays listed so that a genuinely quill-only asset is covered by the
+    # deploy gate the day it lands rather than the day someone remembers.
     *sorted(
-        p for d in ((ROOT / "assets"), (ROOT / "quill" / "assets"))
+        p for d in ((ROOT / "assets"), (ROOT / "quill" / "assets")) if d.is_dir()
         for p in d.rglob("*")
         if p.is_file()
         and not p.name.startswith(".")
