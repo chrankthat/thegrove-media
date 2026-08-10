@@ -19,7 +19,7 @@
 <meta property="og:type" content="website">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="https://thegrove.media/assets/og-image.png">
-<meta name="x-thegrove-media-source-sha256" content="f119706a66be704bdd825c22281edc7076df48e7031403c1c0c54c6cfbb2b811">
+<meta name="x-thegrove-media-source-sha256" content="20c0100efcc70a1e395ccfe992a79b751f35d4f77b26b8028d5d73b4e2cc64a9">
 <link rel="icon" type="image/png" href="assets/thegrove-media-badge.png?v=755b16ef">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -56,6 +56,7 @@
   <symbol id="icon-linkedin" viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></symbol>
   <symbol id="icon-tunein" viewBox="0 0 24 24"><path d="M12 7.5a2 2 0 100-4 2 2 0 000 4zm-1.1 2.02L7.9 21h2.08l1.02-4.2h2l1.02 4.2h2.08l-3-11.48a2 2 0 00-1.1-1.3 2 2 0 00-1.1 1.3zM6.4 3.05 4.98 1.63a10 10 0 000 14.14L6.4 14.35a8 8 0 010-11.3zm11.2 0a8 8 0 010 11.3l1.42 1.42a10 10 0 000-14.14zM8.87 5.52 7.45 4.1a6 6 0 000 8.48l1.42-1.42a4 4 0 010-5.64zm6.26 0a4 4 0 010 5.64l1.42 1.42a6 6 0 000-8.48z"/></symbol>
   <symbol id="icon-amazon-music" viewBox="0 0 24 24"><path d="M20 3.5a1 1 0 00-1.2-.98l-9 1.8A1 1 0 009 5.3v9.53A3.5 3.5 0 1011 17.5V9.42l7-1.4v4.66a3.5 3.5 0 101.99 3.15L20 3.5zM7.5 19a1.5 1.5 0 110-3 1.5 1.5 0 010 3zm9-2a1.5 1.5 0 110-3 1.5 1.5 0 010 3zM11 7.38V6.12l7-1.4v1.26l-7 1.4z"/></symbol>
+  <symbol id="icon-tiktok" viewBox="0 0 24 24"><path d="M16.6 5.82s.51.5 0 0A4.278 4.278 0 0 1 15.54 3h-3.09v12.4a2.592 2.592 0 0 1-2.59 2.5c-1.42 0-2.6-1.16-2.6-2.6c0-1.72 1.66-3.01 3.37-2.48V9.66c-3.45-.46-6.47 2.22-6.47 5.64c0 3.33 2.76 5.7 5.69 5.7c3.14 0 5.69-2.55 5.69-5.7V9.01a7.35 7.35 0 0 0 4.3 1.38V7.3s-1.88.09-3.24-1.48z"/></symbol>
 </svg>
     <div class="stack">
       <section id="the-quill" class="show" style="--field:#251E19; --ink:#E8DFC9; --accent:#C2643A; --accent-rgb:194,100,58; --display:'Fraunces',serif; --body-font:'Public Sans',sans-serif;">
@@ -78,7 +79,8 @@
             </div>
             <aside class="sidebar" aria-label="The Quill - schedule and links">
               <div class="sidebar-block"><h3 class="sidebar-label"><span class="dot" aria-hidden="true"></span>Schedule</h3><div class="cadence-entry"><p class="cadence-display">New stories every Sunday, Tuesday, and Friday.</p></div>
-<div class="cadence-entry"><p class="cadence-display">A new My Lost Chapters every month.</p></div></div><div class="sidebar-block"><h3 class="sidebar-label"><span class="dot" aria-hidden="true"></span>Watch</h3><ul class="link-list">
+<div class="cadence-entry"><p class="cadence-display">A new My Lost Chapters every month.</p></div></div><div class="sidebar-block"><h3 class="sidebar-label"><span class="dot" aria-hidden="true"></span>Latest Episodes</h3><hr class="latest-rule">
+<ul class="latest-list" data-episode-api="https://quill-scheduler.chris-ba5.workers.dev/episodes?show=quill"></ul></div><div class="sidebar-block"><h3 class="sidebar-label"><span class="dot" aria-hidden="true"></span>Watch</h3><ul class="link-list">
 <li><a href="https://quill.thegrove.media/WatchLatestStory" target="_blank" rel="noopener noreferrer">Latest Story</a></li>
 <li><a href="https://www.youtube.com/@thequill-stories" target="_blank" rel="noopener noreferrer">YouTube Channel</a></li>
 </ul></div><div class="sidebar-block"><h3 class="sidebar-label"><span class="dot" aria-hidden="true"></span>Listen</h3><ul class="icon-row">
@@ -90,6 +92,7 @@
                 <ul class="icon-row">
 <li><a class="icon-link" href="https://www.facebook.com/TheQuillTrueStories" target="_blank" rel="noopener noreferrer" aria-label="Follow on Facebook" title="Facebook"><svg class="icon" viewBox="0 0 24 24"><use href="#icon-facebook"></use></svg></a></li>
 <li><a class="icon-link" href="https://www.instagram.com/TheQuillTrueStories" target="_blank" rel="noopener noreferrer" aria-label="Follow on Instagram" title="Instagram"><svg class="icon" viewBox="0 0 24 24"><use href="#icon-instagram"></use></svg></a></li>
+<li><a class="icon-link" href="https://www.tiktok.com/@thequilltruestories" target="_blank" rel="noopener noreferrer" aria-label="Follow on TikTok" title="TikTok"><svg class="icon" viewBox="0 0 24 24"><use href="#icon-tiktok"></use></svg></a></li>
                 </ul>
               </div>
             </aside>
@@ -194,5 +197,6 @@
   <footer class="site-footer"><p>© 2026 TheGrove AI, LLC</p></footer>
 </div>
 
+<script src="assets/latest-episodes.js" defer></script>
 </body>
 </html>

@@ -27,6 +27,7 @@ BUILD_INPUTS = [
     ROOT / "content" / "icons.json",
     ROOT / "css" / "tokens.css",
     ROOT / "css" / "site.css",
+    ROOT / "assets" / "latest-episodes.js",
     Path(__file__).resolve(),
     # Image bytes are build inputs too. Without them, swapping a mark or photo
     # leaves the digest unchanged, so verify_deploy.py prints PASS against the
@@ -222,18 +223,36 @@ def render_show(show, icons, studio_name):
             f'{schedule_html}</div>'
         )
 
-    # Omit the whole "Latest Episodes" block when there is no data - an absent
-    # section is honest, a section that says "no episodes" is not. See spec
-    # S5 / the 2026-08-04 false-episode-claim fix. Populating `latest` from
-    # the live feeds is deliberately out of scope for this build.
-    latest_html = render_latest_block(show["latest"]) if show["latest"] else ""
-    latest_block = ""
-    if latest_html:
+    # Two independent sources for this block, per show:
+    # - static `latest` array (build-time, honest-when-empty per spec S5 /
+    #   the 2026-08-04 false-episode-claim fix) - unchanged for any show
+    #   that doesn't set episodeApi.
+    # - `episodeApi` (runtime fetch, 2026-08-10 quill-episode-feed-linktree
+    #   design) - the container ALWAYS renders when this field is set, even
+    #   though it starts empty; assets/latest-episodes.js fills it on load
+    #   and removes the whole block on fetch failure, moving the "absent
+    #   section is honest" rule from build time to runtime for this source.
+    #   The two sources are mutually exclusive per show in practice (no show
+    #   sets both today) - if a show ever did, episodeApi wins, since a stale
+    #   static list next to a live one would be the exact dishonesty this
+    #   rule exists to prevent.
+    episode_api = show.get("episodeApi")
+    if episode_api:
         latest_block = (
             '<div class="sidebar-block"><h3 class="sidebar-label">'
             '<span class="dot" aria-hidden="true"></span>Latest Episodes</h3>'
-            f'<hr class="latest-rule">\n{latest_html}</div>'
+            '<hr class="latest-rule">\n'
+            f'<ul class="latest-list" data-episode-api="{esc(episode_api)}"></ul></div>'
         )
+    else:
+        latest_html = render_latest_block(show["latest"]) if show["latest"] else ""
+        latest_block = ""
+        if latest_html:
+            latest_block = (
+                '<div class="sidebar-block"><h3 class="sidebar-label">'
+                '<span class="dot" aria-hidden="true"></span>Latest Episodes</h3>'
+                f'<hr class="latest-rule">\n{latest_html}</div>'
+            )
 
     watch_html = render_link_list(show["watch"]) if show["watch"] else ""
     watch_block = ""
@@ -317,6 +336,7 @@ PAGE_HEAD = '''<!doctype html>
 '''
 
 PAGE_TAIL = '''
+<script src="assets/latest-episodes.js" defer></script>
 </body>
 </html>
 '''
