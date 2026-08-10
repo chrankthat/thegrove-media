@@ -1,0 +1,305 @@
+/* ==========================================================================
+   Layout rules - replace the Tailwind CDN utility classes the mockup used
+   for structure (flex, grid, px-6, mt-10, etc). This repo has no build step
+   and no Tailwind; these are hand-written equivalents.
+   ========================================================================== */
+
+* { box-sizing: border-box; }
+
+html, body { margin: 0; padding: 0; }
+
+body {
+  min-height: 100vh;
+  background: var(--ember);
+  color: var(--cream);
+  font-family: 'Public Sans', sans-serif;
+}
+
+.font-display { font-family: 'Fraunces', serif; }
+
+main {
+  max-width: 36rem;
+  margin: 0 auto;
+  padding: 2rem 1rem 4rem;
+}
+
+@media (min-width: 640px) {
+  main { padding: 3.5rem 1.5rem 4rem; }
+}
+
+section + section { margin-top: 2.5rem; }
+
+.section-heading {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.masthead { padding: 2rem 1.5rem; }
+@media (min-width: 640px) { .masthead { padding: 2.5rem 2.5rem; } }
+
+.masthead-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.mark-circle {
+  margin-bottom: 1rem;
+  display: flex;
+  height: 4rem;
+  width: 4rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: 1px solid rgba(232, 223, 201, 0.3);
+}
+
+.wordmark {
+  font-style: italic;
+  font-size: 1.875rem;
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+@media (min-width: 640px) { .wordmark { font-size: 2.25rem; } }
+
+.tagline {
+  margin-top: 0.5rem;
+  max-width: 20rem;
+  font-size: 0.875rem;
+  color: var(--muted);
+}
+@media (min-width: 640px) { .tagline { font-size: 1rem; } }
+
+.profile-links {
+  margin-top: 1.5rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+}
+
+.profile-links a { display: flex; align-items: center; justify-content: center; }
+
+.popular-grid {
+  display: flex;
+  gap: 0.75rem;
+  overflow-x: auto;
+  padding: 0 1rem 0.5rem;
+  margin: 0 -1rem;
+  scroll-snap-type: x mandatory;
+}
+@media (min-width: 640px) {
+  .popular-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    overflow: visible;
+    padding: 0;
+    margin: 0;
+  }
+}
+
+.popular-card {
+  flex-shrink: 0;
+  width: 78%;
+  scroll-snap-align: start;
+  padding: 0.75rem;
+}
+@media (min-width: 640px) { .popular-card { width: auto; padding: 0.75rem; } }
+
+.filter-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.episode-list { border-top: 1px solid rgba(232, 223, 201, 0.1); }
+.episode-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid rgba(232, 223, 201, 0.1);
+  text-decoration: none;
+}
+
+.row-thumb { height: 3.5rem; width: 5rem; flex-shrink: 0; border-radius: 2px; }
+
+.row-body { min-width: 0; flex: 1; }
+.row-title-line { display: flex; flex-wrap: wrap; align-items: center; gap: 0.375rem 0.5rem; }
+.row-title { font-size: 15px; color: var(--cream); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin: 0; }
+.episode-row:hover .row-title, .episode-row:focus-visible .row-title { color: #D97C4E; }
+.row-meta { margin: 2px 0 0; font-size: 0.75rem; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.hero-thumb { width: 100%; aspect-ratio: 16 / 9; border-radius: 2px; }
+.hero-meta-row { margin-top: 0.75rem; display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; }
+.hero-title { margin: 0.5rem 0 0; font-size: 1.25rem; line-height: 1.3; }
+@media (min-width: 640px) { .hero-title { font-size: 1.5rem; } }
+.hero-context { margin: 2px 0 0; font-size: 0.875rem; color: var(--muted); }
+.hero-views { margin-top: 0.5rem; display: flex; align-items: center; gap: 0.375rem; font-size: 0.75rem; color: #D97C4E; }
+
+.card-thumb { width: 100%; aspect-ratio: 16 / 9; border-radius: 2px; }
+.card-title { margin: 0.75rem 0 0; font-size: 1rem; line-height: 1.3; }
+.card-context { margin: 2px 0 0; font-size: 0.75rem; color: var(--muted); }
+.card-views { margin-top: 0.5rem; display: flex; align-items: center; gap: 0.375rem; font-size: 0.75rem; color: #D97C4E; }
+
+.site-footer { margin-top: 3.5rem; text-align: center; font-size: 0.75rem; color: rgba(201, 191, 168, 0.7); }
+.site-footer p { margin: 0; }
+
+/* ==========================================================================
+   Below this line: copied verbatim from direction-chosen.html lines 29-177
+   (the mockup's own hand-written <style> block). Do not paraphrase - these
+   rules are already accessibility-reviewed and carry a real WCAG AA fix
+   (see the Struck Match / match-light / match-deep comment below).
+   ========================================================================== */
+
+:root {
+  --ember: #251E19;
+  --cream: #E8DFC9;
+  --match: #C2643A;
+  --olive: #5C6338;
+  --navy: #4A5D7A;
+  --muted: #C9BFA8;
+}
+
+* { -webkit-tap-highlight-color: transparent; }
+
+html, body {
+  background: var(--ember);
+  color: var(--cream);
+}
+
+body {
+  font-family: 'Public Sans', sans-serif;
+}
+
+.font-display { font-family: 'Fraunces', serif; }
+
+/* ---------------------------------------------------------
+   THE FRAME - dotted border + corner flourish system.
+   Deliberately used in exactly three places: the masthead,
+   the Latest Story hero card (#latest-card), and each Most
+   Popular card. Nowhere else on this page - the flat list
+   below drops it on purpose, see the All Stories section.
+   --------------------------------------------------------- */
+.frame {
+  position: relative;
+  border: 1.5px dashed var(--match);
+  border-radius: 3px;
+}
+
+.corner {
+  position: absolute;
+  width: 22px;
+  height: 22px;
+  color: var(--match);
+  opacity: 0.85;
+  pointer-events: none;
+}
+.corner-tl { top: -1px; left: -1px; }
+.corner-tr { top: -1px; right: -1px; transform: scaleX(-1); }
+.corner-bl { bottom: -1px; left: -1px; transform: scaleY(-1); }
+.corner-br { bottom: -1px; right: -1px; transform: scale(-1, -1); }
+
+.ember-dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--match);
+  box-shadow: 0 0 6px 1px rgba(194, 100, 58, 0.55);
+}
+
+.tap {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+.profile-icon {
+  color: var(--cream);
+  opacity: 0.82;
+  transition: opacity 0.15s ease, color 0.15s ease, transform 0.15s ease;
+}
+.profile-icon:hover, .profile-icon:focus-visible {
+  opacity: 1;
+  color: var(--match);
+  transform: translateY(-1px);
+}
+
+a:focus-visible, button:focus-visible {
+  outline: 2px solid var(--match);
+  outline-offset: 2px;
+}
+
+.popular-scroll::-webkit-scrollbar { display: none; }
+.popular-scroll { scrollbar-width: none; -ms-overflow-style: none; }
+
+.chip {
+  font-family: 'Public Sans', sans-serif;
+  font-weight: 600;
+  font-size: 13px;
+  letter-spacing: 0.01em;
+  border: 1.5px solid transparent;
+  transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease, opacity 0.15s ease;
+}
+
+/* Struck Match at full saturation (#C2643A) is ~4.05:1 on Ember Charcoal,
+   under the 4.5:1 AA floor for text this small - fails as a text color
+   even though it passes fine as a border/decorative color (3:1 floor).
+   match-light lifts it just enough to clear AA for battle-format text;
+   match-deep (the in-video brick red this chrome color was brightened
+   FROM, per brand-guide.md) gives the pressed-battle chip a background
+   dark enough for cream text, matching how the other two pressed chips
+   already work (colored bg + cream text, not colored bg + colored text). */
+.chip[data-format="battle"] { border-color: var(--match); color: #D97C4E; }
+.chip[data-format="trial"] { border-color: var(--olive); color: #A9B085; }
+.chip[data-format="chapters"] { border-color: var(--navy); color: #9FB2CC; }
+
+.chip[aria-pressed="true"][data-format="battle"] { background: #8A4636; color: var(--cream); }
+.chip[aria-pressed="true"][data-format="trial"] { background: var(--olive); color: var(--cream); }
+.chip[aria-pressed="true"][data-format="chapters"] { background: var(--navy); color: var(--cream); }
+
+.chip[aria-pressed="false"] { opacity: 0.55; }
+
+.format-pill {
+  font-family: 'Public Sans', sans-serif;
+  font-weight: 600;
+  font-size: 11px;
+  letter-spacing: 0.02em;
+  border: 1px solid currentColor;
+  white-space: nowrap;
+}
+.format-pill[data-format="battle"] { color: #D97C4E; }
+.format-pill[data-format="trial"] { color: #A9B085; }
+.format-pill[data-format="chapters"] { color: #9FB2CC; }
+
+.placeholder-thumb {
+  background:
+    linear-gradient(135deg, rgba(232,223,201,0.10), rgba(232,223,201,0.02));
+  position: relative;
+  overflow: hidden;
+}
+.placeholder-thumb::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: repeating-linear-gradient(
+    -45deg,
+    rgba(232, 223, 201, 0.06),
+    rgba(232, 223, 201, 0.06) 1px,
+    transparent 1px,
+    transparent 8px
+  );
+}
+
+.row-hidden { display: none !important; }
+
+.empty-state {
+  display: none;
+}
+.empty-state.show {
+  display: block;
+}
