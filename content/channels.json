@@ -44,12 +44,14 @@
       ],
       "socials": [
         { "label": "Facebook", "icon": "Facebook", "url": "https://www.facebook.com/TheQuillTrueStories" },
-        { "label": "Instagram", "icon": "Instagram", "url": "https://www.instagram.com/TheQuillTrueStories" }
+        { "label": "Instagram", "icon": "Instagram", "url": "https://www.instagram.com/TheQuillTrueStories" },
+        { "label": "TikTok", "icon": "TikTok", "url": "https://www.tiktok.com/@thequilltruestories" }
       ],
       "cadence": [
         { "display": "New stories every Sunday, Tuesday, and Friday.", "source": "TheQuill/scheduling/tq-calendar.json", "verified": "2026-08-04" },
         { "display": "A new My Lost Chapters every month.", "source": "TheQuill/scheduling/mlc-calendar.json", "verified": "2026-08-04" }
       ],
+      "episodeApi": "https://quill-scheduler.chris-ba5.workers.dev/episodes?show=quill",
       "feeds": { "youtube": null, "podcast": "https://rss.thequill.ai/tq/podcast.xml" },
       "latest": []
     },
