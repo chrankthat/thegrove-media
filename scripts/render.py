@@ -29,6 +29,20 @@ BUILD_INPUTS = [
     ROOT / "css" / "site.css",
     ROOT / "assets" / "latest-episodes.js",
     Path(__file__).resolve(),
+    # The /quill sub-page and the Pages middleware are build inputs too, even
+    # though render.py does not generate them. verify_deploy.py reads the
+    # digest out of the ROOT index.html, so any file omitted here is invisible
+    # to the deploy gate: its bytes can change on disk and the gate still
+    # prints PASS - against the PREVIOUS deploy. Demonstrated live 2026-08-10
+    # (a full quill/ redesign hashed identically to the deploy before it), the
+    # same false-green class the sprint review caught when the digest covered
+    # channels.json alone. Listed explicitly rather than globbed: these are the
+    # hand-written files of a second page, not a directory that grows on its
+    # own.
+    ROOT / "quill" / "index.html",
+    ROOT / "quill" / "css" / "quill-page.css",
+    ROOT / "quill" / "js" / "quill-page.js",
+    ROOT / "functions" / "_middleware.js",
     # Image bytes are build inputs too. Without them, swapping a mark or photo
     # leaves the digest unchanged, so verify_deploy.py prints PASS against the
     # PREVIOUS deploy - the same false-green class the sprint review caught when

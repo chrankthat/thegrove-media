@@ -5,12 +5,6 @@
 
   const FORMAT_LABEL = { battle: "Battle", trial: "Trial", chapters: "My Lost Chapters" };
 
-  const FORMAT_ICON = {
-    battle: '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 20L14 10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M13 4L20 11" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M4 4L20 20" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>',
-    trial: '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 3V21" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M5 7H19" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M3 7L6 13H2L5 7Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M17 7L20 13H16L19 7Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>',
-    chapters: '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 5C10 3.8 6.5 3.5 4 4.2V17.5C6.5 16.8 10 17.1 12 18.3C14 17.1 17.5 16.8 20 17.5V4.2C17.5 3.5 14 3.8 12 5Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M12 5V18.3" stroke="currentColor" stroke-width="1.5"/></svg>',
-  };
-
   // RULING-2: every value that reaches innerHTML - text node or attribute -
   // passes through esc() first. See task-13-report.md for the audited site list.
   function esc(s) {
@@ -36,8 +30,25 @@
     return Object.prototype.hasOwnProperty.call(FORMAT_LABEL, fmt) ? FORMAT_LABEL[fmt] : fmt;
   }
 
-  function formatIcon(fmt) {
-    return Object.prototype.hasOwnProperty.call(FORMAT_ICON, fmt) ? FORMAT_ICON[fmt] : "";
+  function watchUrl(videoId) {
+    return "https://www.youtube.com/watch?v=" + encodeURIComponent(videoId);
+  }
+
+  // The two images per episode are NOT crops of each other. `thumbnail_url` is
+  // 3000x3000 square podcast cover art; the YouTube still is a separately
+  // composed 16:9 frame. The hero renders 16:9, so it must use the YouTube
+  // still - forcing the square art into a 16:9 box is exactly the stretch this
+  // revision removes. Square slots (Most Popular, All Stories) keep the cover
+  // art. Requires https://i.ytimg.com in the _headers CSP img-src.
+  function youtubeThumb(videoId) {
+    return "https://i.ytimg.com/vi/" + encodeURIComponent(videoId) + "/maxresdefault.jpg";
+  }
+
+  function thumbHtml(src, wrapClass) {
+    const inner = src
+      ? '<img src="' + esc(src) + '" alt="" loading="lazy">'
+      : '<div class="placeholder-thumb"></div>';
+    return '<div class="' + wrapClass + '">' + inner + "</div>";
   }
 
   function cornerMarkup() {
@@ -47,54 +58,78 @@
     }).join("");
   }
 
-  document.getElementById("masthead").insertAdjacentHTML("afterbegin", cornerMarkup());
-
-  function thumbHtml(ep, className) {
-    if (!ep.thumbnail_url) return '<div class="placeholder-thumb ' + className + '"></div>';
-    return '<img class="' + className + '" src="' + esc(ep.thumbnail_url) + '" alt="" width="320" height="180" loading="lazy">';
+  function pillHtml(fmt) {
+    return '<span class="format-pill" data-format="' + esc(fmt) + '">' +
+      esc(formatLabel(fmt)) + "</span>";
   }
 
   function renderLatestCard(ep) {
-    const latestCard = document.getElementById("latest-card");
+    const slot = document.getElementById("latest-slot");
     if (!ep) {
-      latestCard.closest("section").remove();
+      document.getElementById("latest-section").remove();
       return;
     }
     const viewsText = formatViews(ep.view_count);
     const viewsBlock = viewsText
-      ? '<div class="hero-views">' +
-          '<span class="ember-dot" aria-hidden="true"></span><span>' + esc(viewsText) + "</span>" +
-        "</div>"
-      : "";
-    latestCard.innerHTML =
-      cornerMarkup() +
-      thumbHtml(ep, "hero-thumb") +
-      '<div class="hero-meta-row">' +
-        '<span class="format-pill" data-format="' + esc(ep.format) + '">' +
-          formatIcon(ep.format) + "<span>" + esc(formatLabel(ep.format)) + "</span>" +
-        "</span>" +
-        '<span class="tagline">' + esc(formatDate(ep.published_at)) + "</span>" +
-      "</div>" +
-      '<h3 class="font-display hero-title">' + esc(ep.title) + "</h3>" +
-      viewsBlock;
+      ? '<span class="hero-views"><span class="ember-dot" aria-hidden="true"></span>' +
+          esc(viewsText) + "</span>"
+      : "<span></span>";
+
+    const card =
+      '<article id="latest-card" class="frame">' +
+        cornerMarkup() +
+        '<div class="latest-card-inner">' +
+          thumbHtml(ep.video_id ? youtubeThumb(ep.video_id) : null, "hero-thumb-wrap") +
+          '<div class="hero-meta-row">' +
+            pillHtml(ep.format) +
+            '<span class="hero-context">' + esc(formatDate(ep.published_at)) + "</span>" +
+          "</div>" +
+          '<h3 class="font-display hero-title">' + esc(ep.title) + "</h3>" +
+          '<div class="hero-views-row">' +
+            viewsBlock +
+            '<span class="tap-arrow" aria-hidden="true">&#8250;</span>' +
+          "</div>" +
+        "</div>" +
+      "</article>";
+
+    // The whole card is the link. Without a video_id there is nothing to link
+    // to, so the card renders unwrapped rather than as a dead anchor.
+    slot.innerHTML = ep.video_id
+      ? '<a class="card-link" href="' + esc(watchUrl(ep.video_id)) + '" target="_blank" ' +
+        'rel="noopener noreferrer" aria-label="Watch ' + esc(ep.title) + ' on YouTube">' +
+        card + "</a>"
+      : card;
   }
 
   function renderPopular(episodes) {
     const wrap = document.getElementById("popular-scroll");
     episodes.forEach(function (ep) {
-      const card = document.createElement("article");
-      card.className = "frame popular-card";
       const viewsText = formatViews(ep.view_count);
       const viewsBlock = viewsText
-        ? '<div class="card-views">' +
-            '<span class="ember-dot" aria-hidden="true"></span><span>' + esc(viewsText) + "</span>" +
-          "</div>"
-        : "";
-      card.innerHTML =
-        cornerMarkup() +
-        thumbHtml(ep, "card-thumb") +
-        '<h3 class="font-display card-title">' + esc(ep.title) + "</h3>" +
-        viewsBlock;
+        ? '<span class="popular-views"><span class="ember-dot" aria-hidden="true"></span>' +
+            esc(viewsText) + "</span>"
+        : "<span></span>";
+
+      const card = document.createElement("div");
+      card.className = "popular-card";
+      const inner =
+        '<div class="frame">' +
+          cornerMarkup() +
+          '<div class="popular-card-inner">' +
+            thumbHtml(ep.thumbnail_url, "popular-thumb-wrap") +
+            '<h3 class="font-display popular-title">' + esc(ep.title) + "</h3>" +
+            '<div class="popular-bottom-row">' +
+              viewsBlock +
+              '<span class="tap-arrow" aria-hidden="true">&#8250;</span>' +
+            "</div>" +
+          "</div>" +
+        "</div>";
+
+      card.innerHTML = ep.video_id
+        ? '<a class="card-link" href="' + esc(watchUrl(ep.video_id)) + '" target="_blank" ' +
+          'rel="noopener noreferrer" aria-label="Watch ' + esc(ep.title) + ' on YouTube">' +
+          inner + "</a>"
+        : inner;
       wrap.appendChild(card);
     });
   }
@@ -103,38 +138,43 @@
     const listWrap = document.getElementById("episode-list");
     episodes.forEach(function (ep) {
       const row = document.createElement("a");
-      row.href = "https://www.youtube.com/watch?v=" + encodeURIComponent(ep.video_id);
+      row.href = watchUrl(ep.video_id);
       row.target = "_blank";
       row.rel = "noopener noreferrer";
       row.dataset.format = ep.format;
       row.className = "episode-row tap";
+      row.setAttribute("aria-label", "Watch " + ep.title + " on YouTube");
       const viewsText = formatViews(ep.view_count);
-      const metaText = esc(formatDate(ep.published_at)) + (viewsText ? " &middot; " + esc(viewsText) : "");
+      const metaText = esc(formatDate(ep.published_at)) +
+        (viewsText ? " &middot; " + esc(viewsText) : "");
       row.innerHTML =
-        thumbHtml(ep, "row-thumb") +
+        thumbHtml(ep.thumbnail_url, "row-thumb-wrap") +
         '<div class="row-body">' +
           '<div class="row-title-line">' +
             '<h3 class="font-display row-title">' + esc(ep.title) + "</h3>" +
-            '<span class="format-pill" data-format="' + esc(ep.format) + '">' +
-              formatIcon(ep.format) + "<span>" + esc(formatLabel(ep.format)) + "</span>" +
-            "</span>" +
           "</div>" +
-          '<p class="row-meta">' + metaText + "</p>" +
-        "</div>";
+          '<p class="row-meta">' + pillHtml(ep.format) + "<span>" + metaText + "</span></p>" +
+        "</div>" +
+        '<span class="row-arrow" aria-hidden="true">&#8250;</span>';
       listWrap.appendChild(row);
     });
   }
 
+  // Single-select. The resting state is "nothing selected, everything
+  // visible": clicking a chip isolates that format, clicking the same chip
+  // again returns to the unfiltered state, and clicking a different chip
+  // switches to it. The previous behaviour started with all three chips
+  // pressed and toggled them OFF, so a first click read as "remove this
+  // format" - the inverse of what a filter chip is expected to do.
   function wireFilter() {
-    const active = { battle: true, trial: true, chapters: true };
     const chips = document.querySelectorAll(".chip");
     const rows = document.querySelectorAll("#episode-list > a");
     const emptyState = document.getElementById("empty-state");
 
-    function applyFilter() {
+    function apply(selected) {
       let visibleCount = 0;
       rows.forEach(function (row) {
-        const show = active[row.dataset.format];
+        const show = selected === null || row.dataset.format === selected;
         row.classList.toggle("row-hidden", !show);
         if (show) visibleCount++;
       });
@@ -143,14 +183,18 @@
 
     chips.forEach(function (chip) {
       chip.addEventListener("click", function () {
-        const fmt = chip.dataset.format;
-        active[fmt] = !active[fmt];
-        chip.setAttribute("aria-pressed", String(active[fmt]));
-        applyFilter();
+        const wasSelected = chip.getAttribute("aria-pressed") === "true";
+        chips.forEach(function (c) { c.setAttribute("aria-pressed", "false"); });
+        if (wasSelected) {
+          apply(null);
+          return;
+        }
+        chip.setAttribute("aria-pressed", "true");
+        apply(chip.dataset.format);
       });
     });
 
-    applyFilter();
+    apply(null);
   }
 
   // Reached from two different failure shapes: a genuinely empty catalog
@@ -163,10 +207,9 @@
   // handlers and three inert buttons over an error message is its own
   // small dishonesty.
   function renderError(isFetchFailure) {
-    document.getElementById("latest-section").remove();
-    document.querySelectorAll("section").forEach(function (section) {
-      if (section.querySelector("#popular-scroll")) section.remove();
-      if (section.querySelector(".filter-row")) section.remove();
+    ["latest-section", "popular-section", "filter-section"].forEach(function (id) {
+      const el = document.getElementById(id);
+      if (el) el.remove();
     });
     const message = isFetchFailure
       ? "Couldn't load stories right now - check back soon, or find us on "
@@ -186,10 +229,10 @@
         renderError(false);
         return;
       }
-      const latest = episodes.slice().sort(function (a, b) {
+      const byLatest = episodes.slice().sort(function (a, b) {
         return new Date(b.published_at) - new Date(a.published_at);
-      })[0];
-      renderLatestCard(latest);
+      });
+      renderLatestCard(byLatest[0]);
 
       // "Most Popular" is a ranking claim. If every episode has a null/
       // undefined view_count (e.g. the daily view-count refresh hasn't run
@@ -205,12 +248,9 @@
         }).slice(0, 3);
         renderPopular(popular);
       } else {
-        document.getElementById("popular-scroll").closest("section").remove();
+        document.getElementById("popular-section").remove();
       }
 
-      const byLatest = episodes.slice().sort(function (a, b) {
-        return new Date(b.published_at) - new Date(a.published_at);
-      });
       renderList(byLatest);
 
       wireFilter();

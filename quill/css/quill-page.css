@@ -1,52 +1,94 @@
 /* ==========================================================================
-   Layout rules - replace the Tailwind CDN utility classes the mockup used
-   for structure (flex, grid, px-6, mt-10, etc). This repo has no build step
-   and no Tailwind; these are hand-written equivalents.
+   The Quill episode page - hand-written CSS.
+
+   The design mockups run on the Tailwind CDN; this repo has no build step and
+   no Tailwind, so every utility class in the mockup is translated by hand
+   here. Build target for this revision:
+   TheGrove docs/design/2026-08-10-quill-card-refinement/direction-chosen.html
+   (Direction B's unframed masthead band on Direction C's body).
    ========================================================================== */
 
-* { box-sizing: border-box; }
+:root {
+  --ember: #251E19;
+  --cream: #E8DFC9;
+  --match: #C2643A;
+  /* Struck Match at full saturation (#C2643A) is ~4.05:1 on Ember Charcoal,
+     under the 4.5:1 AA floor for small text - it passes as a border or
+     decorative color (3:1 floor) but fails as a text color. match-light lifts
+     it just enough to clear AA; match-deep (the in-video brick red this chrome
+     color was brightened FROM, per brand-guide.md) is dark enough to carry
+     cream text as a pressed-chip background. */
+  --match-light: #D97C4E;
+  --match-deep: #8A4636;
+  --olive: #5C6338;
+  --navy: #4A5D7A;
+  --muted: #C9BFA8;
+  /* Text-safe liftings of --olive / --navy. Used for BOTH the format-pill
+     text and the resting chip border - see the .chip rules below for why the
+     border needs the lifted value and not the raw accent. */
+  --trial-text: #A9B085;
+  --chapters-text: #9FB2CC;
+}
 
-html, body { margin: 0; padding: 0; }
+/* ==========================================================================
+   Baseline reset. The mockup runs on Tailwind CDN, which ships Preflight
+   alongside its utilities - headings there inherit font-size/font-weight from
+   their parent and paragraphs get margin: 0. Without this reset every heading
+   and paragraph below falls back to raw browser defaults (bold headings with
+   UA margins) instead of the mockup's actual rendered baseline.
+   ========================================================================== */
+
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--ember);
+  color: var(--cream);
+}
 
 body {
   min-height: 100vh;
-  background: var(--ember);
-  color: var(--cream);
   font-family: 'Public Sans', sans-serif;
 }
 
-.font-display { font-family: 'Fraunces', serif; }
-
-/* Preflight-equivalent baseline reset. The mockup runs on Tailwind CDN,
-   which ships Preflight (a UA-default reset) alongside its utilities -
-   headings there inherit font-size/font-weight from their parent (so no
-   browser bold, no browser heading margin) and paragraphs get margin: 0.
-   This repo has no Tailwind, so without this reset every heading and
-   paragraph below falls back to raw browser defaults (bold headings with
-   UA margins, paragraphs with UA vertical margins) instead of the
-   mockup's actual rendered baseline. Verified against a live render of
-   direction-chosen.html: h1/h2 there compute font-weight 400, margin 0. */
 h1, h2, h3, h4, h5, h6 {
   margin: 0;
   font-weight: inherit;
   font-size: inherit;
 }
 
-p {
-  margin: 0;
-}
+p { margin: 0; }
+
+/* Whole cards and whole rows are single <a> elements now, so the UA's blue
+   underlined-link default would repaint every card. */
+a { text-decoration: none; color: inherit; }
+
+.font-display { font-family: 'Fraunces', serif; }
+
+/* ==========================================================================
+   Page shell
+   ========================================================================== */
 
 main {
   max-width: 36rem;
   margin: 0 auto;
-  padding: 2rem 1rem 4rem;
+  /* Was 2rem top. The masthead band + divider now sit OUTSIDE main and carry
+     their own spacing, so main's top padding shrinks to 1.25rem. */
+  padding: 1.25rem 1rem 4rem;
 }
 
 @media (min-width: 640px) {
-  main { padding: 3.5rem 1.5rem 4rem; }
+  main { padding: 1.5rem 1.5rem 4rem; }
 }
 
 section + section { margin-top: 2.5rem; }
+
+/* The "All Stories" section is the mockup's one deliberate exception to the
+   otherwise-uniform 2.5rem spacing between sections - it uses 1.5rem. A class
+   selector beats the "section + section" type selector regardless of source
+   order, so this is safe wherever it sits in the file. */
+.section-tight { margin-top: 1.5rem; }
 
 .section-heading {
   display: flex;
@@ -55,8 +97,6 @@ section + section { margin-top: 2.5rem; }
   margin-bottom: 1rem;
 }
 
-/* text-xl / sm:text-2xl on every <h2 class="font-display">. Verified live
-   against the mockup: 20px/28px line-height at base, 24px/32px at sm. */
 h2.font-display {
   font-size: 1.25rem;
   line-height: 1.75rem;
@@ -65,233 +105,19 @@ h2.font-display {
   h2.font-display { font-size: 1.5rem; line-height: 2rem; }
 }
 
-/* The "All Stories" section is the mockup's one deliberate exception to
-   the otherwise-uniform mt-10 (2.5rem) spacing between sections - it uses
-   mt-6 (1.5rem). A class selector beats the "section + section" type
-   selector below regardless of source order, so this is safe wherever it
-   sits in the file. */
-.section-tight { margin-top: 1.5rem; }
-
-.masthead { padding: 2rem 1.5rem; }
-@media (min-width: 640px) { .masthead { padding: 2.5rem 2.5rem; } }
-
-.masthead-content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-}
-
-.mark-circle {
-  margin-bottom: 1rem;
-  display: flex;
-  height: 4rem;
-  width: 4rem;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  border: 1px solid rgba(232, 223, 201, 0.3);
-}
-
-.wordmark {
-  font-style: italic;
-  font-size: 1.875rem;
-  line-height: 2.25rem;
-  /* tracking-tight = -0.025em (Tailwind's fixed ratio), not -0.01em.
-     Verified live against the mockup: -0.75px at 30px font-size. */
-  letter-spacing: -0.025em;
-  margin: 0;
-}
-@media (min-width: 640px) { .wordmark { font-size: 2.25rem; line-height: 2.5rem; } }
-
-.tagline {
-  margin-top: 0.5rem;
-  max-width: 20rem;
-  font-size: 0.875rem;
-  line-height: 1.25rem;
-  color: var(--muted);
-}
-@media (min-width: 640px) { .tagline { font-size: 1rem; line-height: 1.5rem; } }
-
-.profile-links {
-  margin-top: 1.5rem;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: center;
-  gap: 0.25rem;
-}
-
-.profile-links a { display: flex; align-items: center; justify-content: center; }
-
-.popular-grid {
-  display: flex;
-  gap: 0.75rem;
-  overflow-x: auto;
-  padding: 0 1rem 0.5rem;
-  margin: 0 -1rem;
-  scroll-snap-type: x mandatory;
-}
-@media (min-width: 640px) {
-  .popular-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    overflow: visible;
-    /* Mockup only clears the horizontal padding at this breakpoint
-       (sm:px-0) - pb-2 (0.5rem bottom) is never overridden and survives
-       to desktop. Verified live: computed padding is "0px 0px 8px". */
-    padding: 0 0 0.5rem;
-    margin: 0;
-  }
-}
-
-.popular-card {
-  flex-shrink: 0;
-  width: 78%;
-  scroll-snap-align: start;
-  padding: 0.75rem;
-}
-@media (min-width: 640px) { .popular-card { width: auto; padding: 0.75rem; } }
-
-.filter-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-}
-
-/* rounded-full px-4 py-2.5 on every .chip button. This is a new,
-   additive rule (not an edit to the verbatim .chip rule below, which
-   only carries font/border/transition) - the two merge with no property
-   overlap. Missing this made every chip render as a plain rectangle at
-   browser-default button padding instead of a pill. Verified live:
-   border-radius 9999px, computed padding "10px 16px". */
-.chip {
-  border-radius: 9999px;
-  padding: 0.625rem 1rem;
-}
-
-/* Mockup uses divide-y on the list container, which only borders elements
-   that have a preceding sibling - the container itself never gets a
-   border, and there is no line after the last row. Translating that as a
-   border-top on the container plus a border-bottom on every row added a
-   line above the whole (empty) list and would add a stray line after the
-   final row once populated - neither exists in the mockup. Verified live:
-   #episode-list computes border-top-width 0px. */
-.episode-row {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 0.75rem 0;
-  text-decoration: none;
-}
-.episode-row + .episode-row { border-top: 1px solid rgba(232, 223, 201, 0.1); }
-
-.row-thumb { height: 3.5rem; width: 5rem; flex-shrink: 0; border-radius: 2px; }
-
-.row-body { min-width: 0; flex: 1; }
-.row-title-line { display: flex; flex-wrap: wrap; align-items: center; gap: 0.375rem 0.5rem; }
-.row-title { font-size: 15px; color: var(--cream); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin: 0; }
-.episode-row:hover .row-title, .episode-row:focus-visible .row-title { color: #D97C4E; }
-.row-meta { margin: 2px 0 0; font-size: 0.75rem; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-
-/* p-4 sm:p-5 on #latest-card - present on the mockup's <article> itself,
-   missed entirely in the first pass (no padding rule existed for this id).
-   Visible today: the "Loading..." placeholder sat flush against the
-   dashed frame border with zero inset. */
-#latest-card { padding: 1rem; }
-@media (min-width: 640px) { #latest-card { padding: 1.25rem; } }
-
-.hero-thumb { width: 100%; aspect-ratio: 16 / 9; border-radius: 2px; }
-.hero-meta-row { margin-top: 0.75rem; display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; }
-.hero-title { margin: 0.5rem 0 0; font-size: 1.25rem; line-height: 1.3; }
-@media (min-width: 640px) { .hero-title { font-size: 1.5rem; } }
-.hero-context { margin: 2px 0 0; font-size: 0.875rem; color: var(--muted); }
-.hero-views { margin-top: 0.5rem; display: flex; align-items: center; gap: 0.375rem; font-size: 0.75rem; color: #D97C4E; }
-
-.card-thumb { width: 100%; aspect-ratio: 16 / 9; border-radius: 2px; }
-.card-title { margin: 0.75rem 0 0; font-size: 1rem; line-height: 1.3; }
-.card-context { margin: 2px 0 0; font-size: 0.75rem; color: var(--muted); }
-.card-views { margin-top: 0.5rem; display: flex; align-items: center; gap: 0.375rem; font-size: 0.75rem; color: #D97C4E; }
-
-.site-footer { margin-top: 3.5rem; text-align: center; font-size: 0.75rem; line-height: 1rem; color: rgba(201, 191, 168, 0.7); }
-.site-footer p { margin: 0; }
-
-/* pt-8 text-center on #empty-state itself - the container, not just its
-   children. Invisible until Task 13's filter empties the list, but the
-   container-level padding/alignment was entirely missing. */
-#empty-state {
-  padding-top: 2rem;
-  text-align: center;
-}
-
-/* text-lg text-cream on the mockup's first empty-state <p>. */
-.empty-title {
-  font-size: 1.125rem;
-  line-height: 1.75rem;
-  color: var(--cream);
-}
-
-/* mt-1 text-sm text-muted on the mockup's second empty-state <p>. Not the
-   same as .tagline (different margin-top, no max-width constraint), so it
-   gets its own class rather than reusing .tagline with the wrong values. */
-.empty-subtitle {
-  margin-top: 0.25rem;
-  font-size: 0.875rem;
-  line-height: 1.25rem;
-  color: var(--muted);
-}
-
-/* .loading-note has no mockup source (it's a deliberate addition for the
-   real build's network round-trip - see decision doc), so there is no
-   Tailwind utility to translate. Muted caption styling keeps it visually
-   consistent with the rest of the page's secondary text instead of
-   rendering as a bare default <p>. */
-.loading-note {
-  font-size: 0.875rem;
-  line-height: 1.25rem;
-  color: var(--muted);
-}
-
 /* ==========================================================================
-   Below this line: copied verbatim from direction-chosen.html lines 29-177
-   (the mockup's own hand-written <style> block). Do not paraphrase - these
-   rules are already accessibility-reviewed and carry a real WCAG AA fix
-   (see the Struck Match / match-light / match-deep comment below).
+   Shared motifs
    ========================================================================== */
 
-:root {
-  --ember: #251E19;
-  --cream: #E8DFC9;
-  --match: #C2643A;
-  --olive: #5C6338;
-  --navy: #4A5D7A;
-  --muted: #C9BFA8;
-}
-
-* { -webkit-tap-highlight-color: transparent; }
-
-html, body {
-  background: var(--ember);
-  color: var(--cream);
-}
-
-body {
-  font-family: 'Public Sans', sans-serif;
-}
-
-.font-display { font-family: 'Fraunces', serif; }
-
-/* ---------------------------------------------------------
-   THE FRAME - dotted border + corner flourish system.
-   Deliberately used in exactly three places: the masthead,
-   the Latest Story hero card (#latest-card), and each Most
-   Popular card. Nowhere else on this page - the flat list
-   below drops it on purpose, see the All Stories section.
-   --------------------------------------------------------- */
+/* THE FRAME - dashed border + corner flourish system. Used in full (all four
+   corners) on the Latest Story card and each Most Popular card. The masthead
+   deliberately does NOT use it any more: it is an unframed band, with the
+   ember-dot divider carrying the handoff into framed content. */
 .frame {
   position: relative;
   border: 1.5px dashed var(--match);
   border-radius: 3px;
+  transition: border-color 0.15s ease;
 }
 
 .corner {
@@ -301,6 +127,7 @@ body {
   color: var(--match);
   opacity: 0.85;
   pointer-events: none;
+  transition: opacity 0.15s ease, color 0.15s ease;
 }
 .corner-tl { top: -1px; left: -1px; }
 .corner-tr { top: -1px; right: -1px; transform: scaleX(-1); }
@@ -314,6 +141,7 @@ body {
   border-radius: 50%;
   background: var(--match);
   box-shadow: 0 0 6px 1px rgba(194, 100, 58, 0.55);
+  flex-shrink: 0;
 }
 
 .tap {
@@ -321,24 +149,259 @@ body {
   min-width: 44px;
 }
 
+a:focus-visible, button:focus-visible {
+  outline: 2px solid var(--match);
+  outline-offset: 2px;
+}
+
+/* Whole-card link. The hover/focus response lives on the wrapping <a> rather
+   than on the card, so the border, the corner flourishes and the arrow all
+   respond together to one pointer target. */
+.card-link { display: block; }
+.card-link:hover .frame,
+.card-link:focus-visible .frame { border-color: var(--match-light); }
+.card-link:hover .corner,
+.card-link:focus-visible .corner { opacity: 1; color: var(--match-light); }
+.card-link:hover .tap-arrow,
+.card-link:focus-visible .tap-arrow { transform: translateX(3px); color: var(--match-light); }
+
+.tap-arrow {
+  color: var(--muted);
+  font-size: 0.9rem;
+  transition: transform 0.15s ease, color 0.15s ease;
+}
+
+/* ==========================================================================
+   MASTHEAD - unframed band (Direction B)
+
+   No dashed frame and no corner flourishes here: a clean Ember Charcoal band
+   whose only edge is a single low-opacity hairline at the bottom, handing off
+   to the ember-dot divider and the framed content below. Full-bleed, so it
+   sits outside <main> and carries its own horizontal padding.
+   ========================================================================== */
+
+.masthead-band {
+  position: relative;
+  background: var(--ember);
+  border-bottom: 1px solid rgba(232, 223, 201, 0.14);
+  padding: 14px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.mast-row1 {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.mast-mark {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: block;
+  object-fit: cover;
+}
+
+.masthead-wordmark {
+  font-style: italic;
+  font-weight: 500;
+  font-size: 24px;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  color: var(--cream);
+}
+
+.mast-tagline {
+  font-size: 13px;
+  line-height: 1.2;
+  color: var(--muted);
+  text-align: center;
+}
+
+/* 6 icons x 44px + 5 gaps x 6px = 294px, inside the ~350px content width at a
+   390px viewport. 2px left almost no dead space between adjacent 44px targets,
+   which is a real mis-tap risk on a six-icon row. */
+.mast-icons {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
 .profile-icon {
+  min-width: 44px;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   color: var(--cream);
   opacity: 0.82;
   transition: opacity 0.15s ease, color 0.15s ease, transform 0.15s ease;
 }
 .profile-icon:hover, .profile-icon:focus-visible {
   opacity: 1;
-  color: var(--match);
+  color: var(--match-light);
   transform: translateY(-1px);
 }
 
-a:focus-visible, button:focus-visible {
-  outline: 2px solid var(--match);
-  outline-offset: 2px;
+/* THE VISUAL BEAT - ember-dot divider bridging the bare masthead band into
+   the framed content below. Without it, the jump from an unframed band to a
+   full dashed frame reads as inconsistent rather than intentional. */
+.mast-divider {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 22px 24px 0;
+  max-width: 36rem;
+  margin: 0 auto;
+}
+.mast-divider-line { flex: 1; height: 1px; }
+.mast-divider-line.left { background: linear-gradient(to left, transparent, rgba(232, 223, 201, 0.22)); }
+.mast-divider-line.right { background: linear-gradient(to right, transparent, rgba(232, 223, 201, 0.22)); }
+
+/* ==========================================================================
+   LATEST STORY - full frame, true 16:9 YouTube thumbnail, whole-card link
+   ========================================================================== */
+
+/* A class, not the mockup's id: the loading placeholder and the rendered card
+   are two different elements that both need this padding, and only one of
+   them exists at a time. */
+.latest-card-inner { padding: 1rem; }
+@media (min-width: 640px) { .latest-card-inner { padding: 1.25rem; } }
+
+/* The wrap owns the aspect ratio and clips; the image fills it with
+   object-fit: cover. The previous build set aspect-ratio directly on the
+   <img> with no object-fit, which stretched 3000x3000 square cover art into a
+   16:9 box. Both thumbnails on this page now go through a wrap. */
+.hero-thumb-wrap {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: 2px;
+  overflow: hidden;
+  background: rgba(232, 223, 201, 0.06);
+}
+.hero-thumb-wrap img,
+.popular-thumb-wrap img,
+.row-thumb-wrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 
+.hero-meta-row {
+  margin-top: 0.75rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+.hero-title { margin: 0.5rem 0 0; font-size: 1.2rem; line-height: 1.32; }
+@media (min-width: 640px) { .hero-title { font-size: 1.5rem; } }
+.hero-context { font-size: 0.875rem; color: var(--muted); }
+.hero-views-row {
+  margin-top: 0.625rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.hero-views {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.75rem;
+  color: var(--match-light);
+}
+
+/* ==========================================================================
+   MOST POPULAR - narrowed carousel
+
+   The structural fix from Direction C: cards are ~60vw capped at 232px, NOT
+   78vw, so the square cover art renders genuinely square and uncropped
+   (~214x214) instead of being height-capped and cut top and bottom.
+   ========================================================================== */
+
+.popular-scroll {
+  display: flex;
+  gap: 0.75rem;
+  overflow-x: auto;
+  /* 2px of top padding so the cards' corner flourishes, which sit at -1px,
+     are not clipped by the scroll container. */
+  padding: 2px 1rem 0.75rem;
+  margin: 0 -1rem;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
 .popular-scroll::-webkit-scrollbar { display: none; }
-.popular-scroll { scrollbar-width: none; -ms-overflow-style: none; }
+
+.popular-card {
+  flex: 0 0 60vw;
+  max-width: 232px;
+  scroll-snap-align: start;
+}
+
+@media (min-width: 640px) {
+  .popular-scroll {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    overflow: visible;
+    padding: 2px 0 0.5rem;
+    margin: 0;
+  }
+  .popular-card { flex: none; max-width: none; }
+}
+
+.popular-card-inner { padding: 0.5rem; }
+
+.popular-thumb-wrap {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  border-radius: 2px;
+  overflow: hidden;
+  background: rgba(232, 223, 201, 0.06);
+}
+
+.popular-title {
+  margin: 0.375rem 0 0;
+  font-size: 0.8125rem;
+  line-height: 1.1rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.popular-bottom-row {
+  margin-top: 0.3rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.popular-views {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.7rem;
+  color: var(--match-light);
+}
+
+/* ==========================================================================
+   FILTER CHIPS - single-select
+
+   Resting state: nothing selected, every chip outlined and undimmed, all
+   stories visible. Selected: filled. There is deliberately no dimmed
+   aria-pressed="false" state any more - under single-select, "not pressed" is
+   the normal resting state for two of the three chips at all times, and
+   dimming it reads as disabled.
+   ========================================================================== */
+
+.filter-row { display: flex; flex-wrap: wrap; gap: 0.5rem; }
 
 .chip {
   font-family: 'Public Sans', sans-serif;
@@ -346,26 +409,31 @@ a:focus-visible, button:focus-visible {
   font-size: 13px;
   letter-spacing: 0.01em;
   border: 1.5px solid transparent;
-  transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease, opacity 0.15s ease;
+  border-radius: 9999px;
+  padding: 0.625rem 1rem;
+  background: transparent;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
 }
 
-/* Struck Match at full saturation (#C2643A) is ~4.05:1 on Ember Charcoal,
-   under the 4.5:1 AA floor for text this small - fails as a text color
-   even though it passes fine as a border/decorative color (3:1 floor).
-   match-light lifts it just enough to clear AA for battle-format text;
-   match-deep (the in-video brick red this chrome color was brightened
-   FROM, per brand-guide.md) gives the pressed-battle chip a background
-   dark enough for cream text, matching how the other two pressed chips
-   already work (colored bg + cream text, not colored bg + colored text). */
-.chip[data-format="battle"] { border-color: var(--match); color: #D97C4E; }
-.chip[data-format="trial"] { border-color: var(--olive); color: #A9B085; }
-.chip[data-format="chapters"] { border-color: var(--navy); color: #9FB2CC; }
+/* Border color is the text-safe token, not the raw accent. At rest a chip has
+   no fill, so the border is the ONLY signal that it is an interactive
+   control - which puts it under WCAG 1.4.11's 3:1 non-text floor. Raw --olive
+   is 2.58:1 and raw --navy is 2.45:1 on ember, both failing; the lifted
+   tokens are 7.22:1 and 7.60:1. The battle chip already did this correctly.
+   The pressed states below still use the raw accents as BACKGROUNDS, which is
+   a different context with its own (passing) contrast against cream text. */
+.chip[data-format="battle"] { border-color: var(--match); color: var(--match-light); }
+.chip[data-format="trial"] { border-color: var(--trial-text); color: var(--trial-text); }
+.chip[data-format="chapters"] { border-color: var(--chapters-text); color: var(--chapters-text); }
 
-.chip[aria-pressed="true"][data-format="battle"] { background: #8A4636; color: var(--cream); }
+.chip[aria-pressed="true"][data-format="battle"] { background: var(--match-deep); color: var(--cream); }
 .chip[aria-pressed="true"][data-format="trial"] { background: var(--olive); color: var(--cream); }
 .chip[aria-pressed="true"][data-format="chapters"] { background: var(--navy); color: var(--cream); }
 
-.chip[aria-pressed="false"] { opacity: 0.55; }
+/* ==========================================================================
+   FORMAT PILLS - text only, no icon
+   ========================================================================== */
 
 .format-pill {
   font-family: 'Public Sans', sans-serif;
@@ -374,14 +442,94 @@ a:focus-visible, button:focus-visible {
   letter-spacing: 0.02em;
   border: 1px solid currentColor;
   white-space: nowrap;
+  padding: 3px 8px;
+  border-radius: 3px;
 }
-.format-pill[data-format="battle"] { color: #D97C4E; }
-.format-pill[data-format="trial"] { color: #A9B085; }
-.format-pill[data-format="chapters"] { color: #9FB2CC; }
+.format-pill[data-format="battle"] { color: var(--match-light); }
+.format-pill[data-format="trial"] { color: var(--trial-text); }
+.format-pill[data-format="chapters"] { color: var(--chapters-text); }
 
+/* ==========================================================================
+   ALL STORIES - unframed rows, square thumbs, whole-row link
+   ========================================================================== */
+
+/* The mockup uses divide-y on the list container, which only borders elements
+   that have a preceding sibling - the container itself never gets a border,
+   and there is no line after the last row. */
+.episode-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 0;
+}
+.episode-row + .episode-row { border-top: 1px solid rgba(232, 223, 201, 0.1); }
+
+.row-thumb-wrap {
+  height: 56px;
+  width: 56px;
+  flex-shrink: 0;
+  border-radius: 2px;
+  overflow: hidden;
+  background: rgba(232, 223, 201, 0.06);
+}
+
+.row-body { min-width: 0; flex: 1; }
+.row-title-line { display: flex; flex-wrap: wrap; align-items: center; gap: 0.375rem 0.5rem; }
+.row-title {
+  font-size: 15px;
+  color: var(--cream);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin: 0;
+  transition: color 0.15s ease;
+}
+.episode-row:hover .row-title, .episode-row:focus-visible .row-title { color: var(--match-light); }
+
+.row-meta {
+  margin: 4px 0 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.375rem 0.5rem;
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+
+.row-arrow {
+  color: var(--muted);
+  flex-shrink: 0;
+  transition: transform 0.15s ease, color 0.15s ease;
+}
+.episode-row:hover .row-arrow, .episode-row:focus-visible .row-arrow {
+  color: var(--match-light);
+  transform: translateX(3px);
+}
+
+.row-hidden { display: none !important; }
+
+/* ==========================================================================
+   Footer, empty + loading states
+   ========================================================================== */
+
+.site-footer {
+  margin-top: 3.5rem;
+  text-align: center;
+  font-size: 0.75rem;
+  line-height: 1rem;
+  color: rgba(201, 191, 168, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+/* Fills whatever thumb wrap it lands in, so an episode with no artwork keeps
+   the row/card geometry instead of collapsing it. */
 .placeholder-thumb {
-  background:
-    linear-gradient(135deg, rgba(232,223,201,0.10), rgba(232,223,201,0.02));
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, rgba(232, 223, 201, 0.10), rgba(232, 223, 201, 0.02));
   position: relative;
   overflow: hidden;
 }
@@ -398,11 +546,29 @@ a:focus-visible, button:focus-visible {
   );
 }
 
-.row-hidden { display: none !important; }
+.empty-state { display: none; padding-top: 2rem; text-align: center; }
+.empty-state.show { display: block; }
 
-.empty-state {
-  display: none;
+.empty-title {
+  font-size: 1.125rem;
+  line-height: 1.75rem;
+  color: var(--cream);
 }
-.empty-state.show {
-  display: block;
+
+.empty-subtitle {
+  margin-top: 0.25rem;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  color: var(--muted);
+}
+
+/* .loading-note and .tagline have no mockup source - they cover the real
+   build's network round-trip and its fetch-failure copy, which the static
+   mockup has no equivalent of. Muted caption styling keeps them visually
+   consistent with the rest of the page's secondary text. */
+.loading-note,
+.tagline {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  color: var(--muted);
 }
