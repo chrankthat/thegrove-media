@@ -35,7 +35,16 @@
        framed content. -->
   <header class="masthead-band" id="masthead">
     <div class="mast-row1">
-      <img src="/assets/marks/quill-circle.png" alt="" class="mast-mark" width="28" height="28">
+      <!-- RELATIVE, and served from a copy under quill/ - not the root-absolute
+           /assets/marks/quill-circle.png. On quill.thegrove.media the Pages
+           middleware prefixes any path outside /quill/ with /quill, so a
+           root-absolute asset URL becomes /quill/assets/... , misses, and falls
+           through to the root index.html - the image renders as 0x0. A relative
+           URL against a copy inside quill/ resolves correctly on BOTH hosts
+           (quill.thegrove.media/ and thegrove.media/quill/). Byte-identical to
+           assets/marks/quill-circle.png; the duplicate goes away if the
+           middleware ever learns to fall back to the unprefixed path. -->
+      <img src="assets/marks/quill-circle.png" alt="" class="mast-mark" width="28" height="28">
       <h1 class="font-display masthead-wordmark">The Quill</h1>
     </div>
     <p class="mast-tagline">Bringing Lost Stories to Life</p>
