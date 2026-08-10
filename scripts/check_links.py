@@ -43,6 +43,21 @@ def collect_urls(channels):
     return sorted(urls)
 
 
+def collect_quill_page_urls():
+    """quill/index.html's masthead profile-link row is hand-authored HTML,
+    not data-driven from channels.json - collect_urls() above never sees
+    these, so they need their own pass.
+
+    The regex matches href="..." anywhere inside an <a ...> tag rather than
+    anchoring to '<a href=' specifically, so a future edit that reorders
+    attributes (e.g. class or aria-label before href) can't silently drop a
+    link from this check.
+    """
+    import re
+    html = (ROOT / "quill" / "index.html").read_text()
+    return set(re.findall(r'<a\s[^>]*?href="(https?://[^"]+)"', html))
+
+
 def is_soft_404(requested, final):
     """A deep link that lands on the site root is a removed resource, not a hit."""
     req_path = urllib.parse.urlparse(requested).path.rstrip("/")
@@ -101,7 +116,7 @@ def check_browser(urls):
 
 
 def main():
-    urls = collect_urls(CHANNELS)
+    urls = sorted(set(collect_urls(CHANNELS)) | collect_quill_page_urls())
 
     for url in urls:
         scheme = urllib.parse.urlparse(url).scheme
