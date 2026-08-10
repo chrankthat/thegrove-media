@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Page not found - The Quill</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<!--
+  The quill-flavoured 404. Cloudflare Pages serves the nearest 404.html walking
+  UP from the requested path, so anything under /quill/ lands here rather than
+  on the studio's root 404 - and since functions/_middleware.js maps
+  quill.thegrove.media/<path> to /quill/<path>, this is what a missing page on
+  that host resolves to.
+
+  Self-contained inline styles on purpose: a 404 has to render even when the
+  missing asset IS the stylesheet, and /quill/css/* carries an edge TTL this
+  token cannot purge. Links are relative so they resolve on BOTH hosts
+  (quill.thegrove.media/ and thegrove.media/quill/) - see quill/index.html for
+  why a root-absolute URL breaks on the custom host.
+-->
+<style>
+  :root {
+    --ember: #251E19;
+    --cream: #E8DFC9;
+    --match: #C2643A;
+    --match-light: #D97C4E;
+    --muted: #C9BFA8;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1.25rem;
+    background: var(--ember);
+    color: var(--cream);
+    font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+  }
+  main { max-width: 30rem; text-align: center; }
+  .dot {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--match);
+    box-shadow: 0 0 6px 1px rgba(194, 100, 58, 0.55);
+    vertical-align: middle;
+  }
+  .code {
+    font-size: 0.8125rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 0 0 0.75rem;
+  }
+  h1 {
+    margin: 0;
+    font-size: 1.75rem;
+    line-height: 1.25;
+    font-weight: 500;
+    font-style: italic;
+    font-family: Georgia, 'Times New Roman', serif;
+  }
+  @media (min-width: 640px) { h1 { font-size: 2.125rem; } }
+  p.lede { margin: 0.875rem 0 0; font-size: 0.9375rem; line-height: 1.6; color: var(--muted); }
+  .links { margin-top: 1.75rem; display: flex; flex-wrap: wrap; gap: 0.75rem; justify-content: center; }
+  .links a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 0 1.125rem;
+    border: 1.5px solid var(--match);
+    border-radius: 999px;
+    color: var(--match-light);
+    text-decoration: none;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    transition: background-color 0.15s ease, color 0.15s ease;
+  }
+  .links a:hover, .links a:focus-visible { background: #8A4636; color: var(--cream); }
+  .links a:focus-visible { outline: 2px solid var(--match); outline-offset: 2px; }
+</style>
+</head>
+<body>
+  <main>
+    <p class="code">Error 404</p>
+    <h1>This story isn't here.</h1>
+    <p class="lede">The link may be out of date, or the address may have a typo in it. Every episode is one click away.</p>
+    <div class="links">
+      <a href="./">All stories</a>
+      <a href="https://www.youtube.com/@thequill-stories" target="_blank" rel="noopener noreferrer">YouTube</a>
+    </div>
+    <p class="lede" style="margin-top:1.5rem"><span class="dot" aria-hidden="true"></span></p>
+  </main>
+</body>
+</html>

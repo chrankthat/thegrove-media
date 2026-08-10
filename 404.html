@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Page not found - TheGrove Studio</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<!--
+  Cloudflare Pages serves the nearest 404.html walking UP from the requested
+  path, with a real 404 status. Without this file Pages falls back to the root
+  index.html at 200, which means every typo'd URL served the homepage and
+  claimed success - and, on quill.thegrove.media, served the WRONG SITE
+  entirely. functions/_middleware.js also depends on this file existing: it
+  branches on a 404 from the asset binding to decide whether to retry a path
+  unprefixed, and without a real 404 there is nothing to branch on.
+
+  Deliberately self-contained (inline styles, no external CSS or fonts): a 404
+  must render correctly even when the thing that is missing is a stylesheet,
+  and /css/* carries a 24h edge TTL this token cannot purge.
+-->
+<style>
+  :root {
+    --paper: #EFE3CC;
+    --paper-ink: #2A2018;
+    --paper-muted: #6B5D48;
+    --studio-amber: #A9782E;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1.25rem;
+    background: var(--paper);
+    color: var(--paper-ink);
+    font-family: Georgia, 'Times New Roman', serif;
+  }
+  main { max-width: 32rem; text-align: center; }
+  .code {
+    font-size: 0.8125rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--paper-muted);
+    margin: 0 0 0.75rem;
+    font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+  }
+  h1 { margin: 0; font-size: 1.75rem; line-height: 1.25; font-weight: 500; }
+  @media (min-width: 640px) { h1 { font-size: 2.25rem; } }
+  p.lede {
+    margin: 0.875rem 0 0;
+    font-size: 1rem;
+    line-height: 1.6;
+    color: var(--paper-muted);
+    font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+  }
+  .links {
+    margin-top: 1.75rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    justify-content: center;
+  }
+  .links a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 0 1.125rem;
+    border: 1px solid var(--studio-amber);
+    border-radius: 999px;
+    color: var(--paper-ink);
+    text-decoration: none;
+    font-size: 0.9375rem;
+    font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+    transition: background-color 0.15s ease, color 0.15s ease;
+  }
+  .links a:hover, .links a:focus-visible { background: var(--studio-amber); color: var(--paper); }
+  .links a:focus-visible { outline: 2px solid var(--paper-ink); outline-offset: 2px; }
+</style>
+</head>
+<body>
+  <main>
+    <p class="code">Error 404</p>
+    <h1>That page isn't here.</h1>
+    <p class="lede">The link may be out of date, or the address may have a typo in it. Everything the studio publishes is one click away.</p>
+    <div class="links">
+      <a href="/">TheGrove Studio</a>
+      <a href="/quill/">The Quill</a>
+    </div>
+  </main>
+</body>
+</html>

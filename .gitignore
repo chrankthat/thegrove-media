@@ -3,3 +3,6 @@ __pycache__/
 .DS_Store
 node_modules/
 verification/
+
+# wrangler pages dev local cache
+.wrangler/

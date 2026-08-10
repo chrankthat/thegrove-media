@@ -43,6 +43,12 @@ BUILD_INPUTS = [
     ROOT / "quill" / "css" / "quill-page.css",
     ROOT / "quill" / "js" / "quill-page.js",
     ROOT / "functions" / "_middleware.js",
+    # The 404 pages are load-bearing routing infrastructure, not decoration:
+    # their presence is what makes the asset binding return a real 404 instead
+    # of falling back to this index.html at 200, which is the branch
+    # _middleware.js uses to decide whether to retry a path unprefixed.
+    ROOT / "404.html",
+    ROOT / "quill" / "404.html",
     # Image bytes are build inputs too. Without them, swapping a mark or photo
     # leaves the digest unchanged, so verify_deploy.py prints PASS against the
     # PREVIOUS deploy - the same false-green class the sprint review caught when
