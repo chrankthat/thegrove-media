@@ -149,6 +149,29 @@ class TestRenderShow(unittest.TestCase):
         self.assertIn("Episode &amp; Two", out)
         self.assertNotIn("<script>", out)
 
+    def test_episode_api_always_renders_container_even_when_latest_is_empty(self):
+        # the-quill sets episodeApi (2026-08-10 quill-episode-feed-linktree
+        # build) and its `latest` is empty in channels.json today - render_show
+        # must still emit the container so assets/latest-episodes.js has a
+        # slot to fill at runtime, unlike the static-`latest` honest-omission
+        # path exercised by test_latest_block_omitted_when_empty above.
+        fake_show = dict(QUILL)
+        fake_show["episodeApi"] = "https://example.com/episodes?show=x"
+        fake_show["latest"] = []
+        out = render_show(fake_show, ICONS, STUDIO_NAME)
+        self.assertIn('data-episode-api="https://example.com/episodes?show=x"', out)
+        self.assertIn('<ul class="latest-list" data-episode-api', out)
+
+    def test_no_episode_api_falls_back_to_static_latest_honest_omission(self):
+        # A show with no episodeApi and an empty `latest` still omits the
+        # whole sidebar-block entirely - the episodeApi branch never fires
+        # for it. Uses TLF, which carries neither field populated today.
+        fake_show = dict(TLF)
+        fake_show["episodeApi"] = None
+        fake_show["latest"] = []
+        out = render_show(fake_show, ICONS, STUDIO_NAME)
+        self.assertNotIn("Latest Episodes", out)
+
     def test_watch_block_omitted_when_empty(self):
         fake_show = dict(QUILL)
         fake_show["watch"] = []

@@ -16,6 +16,7 @@ open the served page from another machine (feedback_serve_urls_use_lan_ip.md).
 """
 import argparse
 import http.server
+import json
 import os
 import socketserver
 import sys
@@ -78,6 +79,18 @@ def run_checks(base, remote, shot_dir):
             page.on("response",
                     lambda r: bad_responses.append(f"{r.status} {r.url}")
                     if r.status >= 400 else None)
+
+            # Mock the-quill's episodeApi endpoint. This must be registered
+            # BEFORE navigation - assets/latest-episodes.js fires its fetch
+            # as soon as the deferred script runs on load, and a route added
+            # after goto() would miss that first (only) request.
+            page.route("**/episodes?show=quill*", lambda route: route.fulfill(
+                status=200, content_type="application/json",
+                body=json.dumps([
+                    {"video_id": "abc123", "title": "The Forgotten Battle"},
+                    {"video_id": "def456", "title": "Five Days at Fromelles"},
+                ])))
+
             page.goto(base, wait_until="networkidle")
             page.mouse.wheel(0, 20000)          # trigger loading="lazy" images
             page.wait_for_timeout(700)
@@ -92,6 +105,10 @@ def run_checks(base, remote, shot_dir):
             pass_(f"{name}: canonical points at apex",
                   page.locator('link[rel="canonical"][href="https://thegrove.media/"]')
                       .count() == 1)
+
+            widget_items = page.locator('[data-episode-api] li').count()
+            pass_(f"{name}: latest-episodes widget renders fetched titles",
+                  widget_items == 2, f"found {widget_items} items, expected 2")
 
             if not remote:
                 pass_(f"{name}: zero console errors",
@@ -183,6 +200,24 @@ def run_checks(base, remote, shot_dir):
               page.locator('a[href*="youtube.com"]').count() >= 3)
         pass_("no-JS: about links present",
               page.locator('a[href="https://shanku.net"]').count() == 1)
+
+        # RULING-1 (Chris, 2026-08-10): the brief's Step 3 called for a
+        # hardcoded `True` here ("widget absent with JS disabled - true by
+        # construction since <script defer> never runs"). That can never
+        # fail, so it verifies nothing. Replaced with a real DOM assertion
+        # that documents the same intentional gap: with JS off, the-quill's
+        # episodeApi container still renders (render.py emits it
+        # unconditionally when episodeApi is set - see render_show) but stays
+        # empty because assets/latest-episodes.js never executes to fill it.
+        # A future reader should read this as "the widget's no-JS behavior is
+        # an empty, still-present slot, not a missing one" - and this
+        # assertion actually fails if that stops being true.
+        widget = page.locator('[data-episode-api]')
+        widget_li_count = widget.locator("li").count()
+        pass_("no-JS: latest-episodes container present but empty with JS disabled (expected)",
+              widget.count() == 1 and widget_li_count == 0,
+              f"container count={widget.count()}, items={widget_li_count}")
+
         context.close()
         browser.close()
 

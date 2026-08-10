@@ -28,6 +28,29 @@ class TestContentShape(unittest.TestCase):
             missing = required - show.keys()
             self.assertFalse(missing, f"{show['id']} missing {missing}")
 
+    def test_episode_api_is_a_well_formed_absolute_url_where_present(self):
+        # test_every_show_has_required_fields is a one-directional subset
+        # check (required - show.keys()) - it only catches MISSING required
+        # fields, never inspects fields a show carries beyond that set. Since
+        # render.py started consuming `episodeApi` (2026-08-10
+        # quill-episode-feed-linktree build), a typo'd key (e.g.
+        # `episodeApiUrl`, `episdoeApi`) would pass every existing content
+        # test silently and surface only as "the widget mysteriously never
+        # renders". This targets that gap directly without building out a
+        # schema framework.
+        quill = next(s for s in self.channels["shows"] if s["id"] == "the-quill")
+        self.assertIn("episodeApi", quill, "the-quill must carry episodeApi")
+        for show in self.channels["shows"]:
+            if "episodeApi" not in show:
+                continue
+            url = show["episodeApi"]
+            self.assertIsInstance(url, str, f"{show['id']} episodeApi must be a string")
+            self.assertTrue(url, f"{show['id']} episodeApi must not be empty")
+            self.assertTrue(
+                url.startswith("https://"),
+                f"{show['id']} episodeApi must be an absolute https:// URL, got {url!r}",
+            )
+
     def test_sash_cohost_url_is_buildwithsash(self):
         hitl = next(s for s in self.channels["shows"] if s["id"] == "human-in-the-loop")
         self.assertEqual(hitl["cohost"]["url"], "https://buildwithsash.com")
