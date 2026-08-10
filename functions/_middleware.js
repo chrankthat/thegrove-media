@@ -8,7 +8,7 @@ export async function onRequest(context) {
   const url = new URL(context.request.url);
   if (url.hostname === "quill.thegrove.media") {
     if (url.pathname === "/" || url.pathname === "") {
-      url.pathname = "/quill/index.html";
+      url.pathname = "/quill/";
     } else if (!url.pathname.startsWith("/quill/")) {
       url.pathname = "/quill" + url.pathname;
     }
