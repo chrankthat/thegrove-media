@@ -89,7 +89,11 @@
     <h1>This story isn't here.</h1>
     <p class="lede">The link may be out of date, or the address may have a typo in it. Every episode is one click away.</p>
     <div class="links">
-      <a href="./">All stories</a>
+      <!-- Absolute, not "./": this page is served for ANY missing path on the
+           host, and a relative link from /deep/nested/missing.html would
+           resolve to /deep/nested/ - another 404. The canonical quill home is
+           the same target from both hosts. -->
+      <a href="https://quill.thegrove.media/">All stories</a>
       <a href="https://www.youtube.com/@thequill-stories" target="_blank" rel="noopener noreferrer">YouTube</a>
     </div>
     <p class="lede" style="margin-top:1.5rem"><span class="dot" aria-hidden="true"></span></p>
