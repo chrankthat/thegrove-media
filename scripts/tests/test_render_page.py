@@ -1,4 +1,5 @@
 import json
+import re
 import unittest
 from pathlib import Path
 
@@ -15,10 +16,26 @@ class TestRenderPage(unittest.TestCase):
     def setUp(self):
         self.out = render_page(CHANNELS, ICONS)
 
-    def test_zero_script_tags(self):
-        # Global constraint: the live page ships no application JS and no
-        # Tailwind CDN script - real compiled CSS only.
-        self.assertNotIn("<script", self.out)
+    def test_exactly_one_same_origin_content_hashed_script_tag(self):
+        # This page shipped zero application JS until the 2026-08-10
+        # quill-episode-feed-linktree build added one optional, fail-soft,
+        # same-origin widget script (assets/latest-episodes.js). The old
+        # "zero script tags anywhere" assertion is no longer true by
+        # design - this pins the tighter invariant that replaces it:
+        # exactly one script tag, same-origin, content-hashed like every
+        # other /assets/* reference, deferred, and nothing third-party or
+        # CDN-hosted.
+        scripts = re.findall(r"<script[^>]*>", self.out)
+        self.assertEqual(len(scripts), 1, f"expected exactly one <script> tag, found {scripts}")
+        tag = scripts[0]
+        self.assertRegex(
+            tag, r'src="assets/latest-episodes\.js\?v=[0-9a-f]{8}"',
+            f"widget script is not same-origin and content-hashed: {tag}",
+        )
+        self.assertIn("defer", tag)
+        self.assertNotIn("http://", tag)
+        self.assertNotIn("https://", tag)
+        self.assertNotIn("cdn.tailwindcss.com", self.out)
 
     def test_shows_appear_in_locked_order(self):
         quill_pos = self.out.index('id="the-quill"')

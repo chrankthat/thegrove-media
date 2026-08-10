@@ -126,13 +126,21 @@ class TestRenderShow(unittest.TestCase):
         # that says "no episodes" is not (the false-episode-claim fix).
         # None of the three shows in channels.json has `latest` populated
         # today, so this holds for real data too.
-        out = render_show(QUILL, ICONS, STUDIO_NAME)
+        # Uses TLF, not QUILL: the-quill now sets episodeApi (2026-08-10
+        # quill-episode-feed-linktree build), so render_show always takes
+        # the episodeApi branch for it regardless of `latest`. TLF still
+        # has no episodeApi and exercises the honest-when-empty static
+        # path this test is named for.
+        out = render_show(TLF, ICONS, STUDIO_NAME)
         self.assertNotIn(">Latest Episodes<", out)
         self.assertNotIn("New episodes will appear here", out)
         self.assertNotIn("latest-empty", out)
 
     def test_latest_block_renders_two_items_escaped(self):
-        fake_show = dict(QUILL)
+        # Uses TLF, not QUILL, for the same reason as the test above -
+        # QUILL now sets episodeApi and would always take that branch,
+        # never reaching the static-`latest` path this test exercises.
+        fake_show = dict(TLF)
         fake_show["latest"] = ["Episode One <script>", "Episode & Two"]
         out = render_show(fake_show, ICONS, STUDIO_NAME)
         self.assertIn(">Latest Episodes<", out)

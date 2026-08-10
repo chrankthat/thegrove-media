@@ -336,7 +336,7 @@ PAGE_HEAD = '''<!doctype html>
 '''
 
 PAGE_TAIL = '''
-<script src="assets/latest-episodes.js" defer></script>
+<script src="{script_href}" defer></script>
 </body>
 </html>
 '''
@@ -426,7 +426,14 @@ def render_page(channels, icons):
     parts.append('  </main>')
     parts.append(f'  <footer class="site-footer"><p>{esc(channels["footer"])}</p></footer>')
     parts.append('</div>')
-    parts.append(PAGE_TAIL)
+    # Content-hashed like every other /assets/* reference: _headers caches
+    # /assets/* immutably for a year with no purge permission on the CF
+    # token, so an unversioned script URL means a widget fix never reaches
+    # an edge or browser that already cached it. Same class of bug the
+    # 2026-08-05 image fix closed - see asset_url()'s docstring. This is
+    # why PAGE_TAIL is filled in here at render time rather than being a
+    # static module-level constant.
+    parts.append(PAGE_TAIL.format(script_href=asset_url("assets/latest-episodes.js")))
     return "\n".join(parts)
 
 
