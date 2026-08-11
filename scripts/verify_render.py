@@ -40,6 +40,16 @@ VIEWPORTS = [("phone", 375, 812), ("tablet", 800, 1024), ("desktop", 1280, 900)]
 LATEST_ENABLED = json.loads(
     (ROOT / "content" / "channels.json").read_text()).get("latestEpisodesEnabled", True)
 
+# Counts only scripts THIS REPO ships. Cloudflare injects its own at the edge on
+# browser requests - the Web Analytics beacon, and an email-decode shim on any
+# page carrying a mailto: - so a bare document.scripts.length is 0 locally and
+# non-zero against the live origin, which would fail a correct page.
+# See feedback_cf_edge_beacon_console_gate.md; same reason the console-error
+# gate below is local-only.
+FIRST_PARTY_SCRIPTS = """() => [...document.querySelectorAll('script')]
+  .map(s => s.src || 'inline')
+  .filter(src => !/cloudflareinsights\\.com|\\/cdn-cgi\\//.test(src))"""
+
 # Evaluated per viewport by run_checks. Kept as a module constant so the
 # quoting stays readable.
 JS_STYLING = """() => {
@@ -126,10 +136,10 @@ def run_checks(base, remote, shot_dir):
                       widget_items == 2, f"found {widget_items} items, expected 2")
             else:
                 containers = page.locator('[data-episode-api]').count()
-                scripts = page.locator('script').count()
+                scripts = page.evaluate(FIRST_PARTY_SCRIPTS)
                 pass_(f"{name}: latest-episodes fully absent while disabled",
-                      containers == 0 and scripts == 0,
-                      f"containers={containers}, script tags={scripts}")
+                      containers == 0 and not scripts,
+                      f"containers={containers}, first-party scripts={scripts}")
                 pass_(f"{name}: no episode fetch while disabled",
                       not episode_requests, str(episode_requests))
 
@@ -246,9 +256,10 @@ def run_checks(base, remote, shot_dir):
                   widget.count() == 1 and widget_li_count == 0,
                   f"container count={widget.count()}, items={widget_li_count}")
         else:
+            nojs_scripts = page.evaluate(FIRST_PARTY_SCRIPTS)
             pass_("no-JS: page is identical with JS disabled (no widget to degrade)",
-                  widget.count() == 0 and page.locator("script").count() == 0,
-                  f"container count={widget.count()}, script tags={page.locator('script').count()}")
+                  widget.count() == 0 and not nojs_scripts,
+                  f"container count={widget.count()}, first-party scripts={nojs_scripts}")
 
         context.close()
         browser.close()
