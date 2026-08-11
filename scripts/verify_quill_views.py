@@ -164,17 +164,23 @@ def run(shots_dir, live_api):
               not any("albuera" in t for t in got))
 
         print("\nplatform marks label the number")
-        n_groups = page.eval_on_selector_all(
-            ".views-platforms", "els => els.length")
-        # hero(1) + popular(3) + list rows(7)
-        check(results, "a mark group at all 11 count sites", n_groups == 11,
-              "got {}".format(n_groups))
+        # Derived from the rendered row count, not hardcoded to len(FIXTURE):
+        # hero(1) + podium(3) + one per list row. A hardcoded expectation here
+        # reads as a page failure the moment the fixture or the real catalog
+        # changes size, which is exactly the false alarm this suite exists to
+        # avoid raising.
+        n_rows = page.eval_on_selector_all("#episode-list > a", "els => els.length")
+        expected_groups = 1 + 3 + n_rows
+        n_groups = page.eval_on_selector_all(".views-platforms", "els => els.length")
+        check(results, "a mark group at every count site",
+              n_groups == expected_groups,
+              "{} rows -> expected {}, got {}".format(n_rows, expected_groups, n_groups))
 
         per_group = page.eval_on_selector_all(
             ".views-platforms",
             "els => els.map(e => e.querySelectorAll('svg.platform-icon').length)")
         check(results, "exactly 3 marks in every group",
-              per_group == [3] * 11, "got: " + repr(per_group))
+              per_group == [3] * n_groups, "got: " + repr(set(per_group)))
 
         # A <use> that fails to resolve still leaves a sized <svg> box, so
         # measuring the box proves nothing (feedback_image_decode_not_bounding_box
@@ -205,8 +211,9 @@ def run(shots_dir, live_api):
         sr = page.eval_on_selector_all(
             ".views-platforms + .sr-only", "els => els.map(e => e.textContent)")
         check(results, "each mark group carries sr-only platform text",
-              len(sr) == 11 and all("YouTube, Instagram and TikTok" in t for t in sr),
-              "got {} spans".format(len(sr)))
+              len(sr) == n_groups
+              and all("YouTube, Instagram and TikTok" in t for t in sr),
+              "got {} spans for {} groups".format(len(sr), n_groups))
         sr_hidden = page.evaluate("""() => {
           const el = document.querySelector('.sr-only');
           const r = el.getBoundingClientRect();
