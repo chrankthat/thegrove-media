@@ -34,6 +34,28 @@
     return "https://www.youtube.com/watch?v=" + encodeURIComponent(videoId);
   }
 
+  // Published YouTube titles carry two suffixes that earn their keep on YouTube
+  // and only cost readability here: a "(Human-Written)" provenance tag and a
+  // " | <Series>" trailer. This page shows the episode title alone.
+  //
+  // Deliberately NOT "strip any trailing parenthetical". One real title is
+  // "The Day My Son Became a Boy (Not the Way You Think)", where the
+  // parenthetical IS the title - a generic rule would silently gut it. Only the
+  // provenance tag is named, so an unrecognised parenthetical always survives.
+  //
+  // DISPLAY-ONLY. The D1 row, the API response, and the YouTube title itself
+  // are untouched; those suffixes are load-bearing for search on YouTube and
+  // belong to TheQuill (see docs/quill-web-page-handoff.md, "the seam").
+  const PROVENANCE_TAG = /\s*\(\s*human[\s-]*written\s*\)\s*$/i;
+
+  function displayTitle(raw) {
+    const full = String(raw === null || raw === undefined ? "" : raw);
+    const stripped = full.split("|")[0].replace(PROVENANCE_TAG, "").trim();
+    // A title that is nothing BUT suffix would render an empty heading. Falling
+    // back to the raw string keeps the card honest instead of blank.
+    return stripped || full.trim();
+  }
+
   // The two images per episode are NOT crops of each other. `thumbnail_url` is
   // 3000x3000 square podcast cover art; the YouTube still is a separately
   // composed 16:9 frame. The hero renders 16:9, so it must use the YouTube
@@ -229,6 +251,12 @@
         renderError(false);
         return;
       }
+      // Normalised once at the boundary rather than at each render site: the
+      // title reaches the DOM from six places (three headings, three aria
+      // labels), and cleaning it here means none of them can drift.
+      episodes.forEach(function (ep) {
+        ep.title = displayTitle(ep.title);
+      });
       const byLatest = episodes.slice().sort(function (a, b) {
         return new Date(b.published_at) - new Date(a.published_at);
       });
