@@ -210,7 +210,7 @@ def render_latest_block(latest):
     return f'<ul class="latest-list">\n{items}\n</ul>'
 
 
-def render_show(show, icons, studio_name):
+def render_show(show, icons, studio_name, latest_enabled=True):
     validate_show(show)
     style = (
         f'--field:{show["field"]}; --ink:{show["ink"]}; --accent:{show["accent"]}; '
@@ -262,8 +262,17 @@ def render_show(show, icons, studio_name):
     #   sets both today) - if a show ever did, episodeApi wins, since a stale
     #   static list next to a live one would be the exact dishonesty this
     #   rule exists to prevent.
+    #
+    # `latestEpisodesEnabled: false` in channels.json switches the whole block
+    # off site-wide, for both sources, without deleting any of it. Chris turned
+    # it off 2026-08-11 pending a redesign - it is the presentation he does not
+    # want, not the data. Nothing renders, so there is no hidden markup for a
+    # screen reader to read out, and render_page also drops the widget script so
+    # a disabled section costs no fetch. Flip the flag back to true to restore.
     episode_api = show.get("episodeApi")
-    if episode_api:
+    if not latest_enabled:
+        latest_block = ""
+    elif episode_api:
         latest_block = (
             '<div class="sidebar-block"><h3 class="sidebar-label">'
             '<span class="dot" aria-hidden="true"></span>Latest Episodes</h3>'
@@ -367,6 +376,13 @@ PAGE_TAIL = '''
 </html>
 '''
 
+# Used when latestEpisodesEnabled is false. The page carries no other script,
+# so with the widget off it ships as pure static HTML and CSS.
+PAGE_TAIL_NO_SCRIPT = '''
+</body>
+</html>
+'''
+
 
 def join_names(names):
     """Oxford-comma join for the meta-description show list, so a fourth show
@@ -465,8 +481,9 @@ def render_page(channels, icons):
     parts.append('  <main>')
     parts.append(render_icon_sprite(icons))
     parts.append('    <div class="stack">')
+    latest_enabled = channels.get("latestEpisodesEnabled", True)
     for show in shows:
-        parts.append(render_show(show, icons, studio["name"]))
+        parts.append(render_show(show, icons, studio["name"], latest_enabled))
     parts.append('    </div>')
     parts.append(render_about(studio))
     parts.append('  </main>')
@@ -479,7 +496,15 @@ def render_page(channels, icons):
     # 2026-08-05 image fix closed - see asset_url()'s docstring. This is
     # why PAGE_TAIL is filled in here at render time rather than being a
     # static module-level constant.
-    parts.append(PAGE_TAIL.format(script_href=asset_url("assets/latest-episodes.js")))
+    #
+    # The script's only job is filling the Latest Episodes containers, so when
+    # the section is off it is dead weight: a request, a parse, and a CSP
+    # connect-src the page no longer exercises. Drop it rather than ship a
+    # script that runs and finds nothing to do.
+    if latest_enabled:
+        parts.append(PAGE_TAIL.format(script_href=asset_url("assets/latest-episodes.js")))
+    else:
+        parts.append(PAGE_TAIL_NO_SCRIPT)
     return "\n".join(parts)
 
 

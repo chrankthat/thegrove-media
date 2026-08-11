@@ -136,6 +136,7 @@
       "latest": []
     }
   ],
+  "latestEpisodesEnabled": false,
   "footer": "© 2026 TheGrove AI, LLC",
   "legal": [
     { "text": "Privacy", "href": "/privacy" },

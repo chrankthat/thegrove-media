@@ -32,6 +32,14 @@ PORT = int(os.environ.get("SERVE_PORT", "8095"))
 
 VIEWPORTS = [("phone", 375, 812), ("tablet", 800, 1024), ("desktop", 1280, 900)]
 
+# The Latest Episodes assertions below follow channels.json rather than being
+# deleted while the section is off, so flipping latestEpisodesEnabled back to
+# true re-arms the widget checks with no edit here. Off, they assert the
+# inverse - that nothing renders and nothing is fetched - which is the property
+# worth pinning while the section is disabled.
+LATEST_ENABLED = json.loads(
+    (ROOT / "content" / "channels.json").read_text()).get("latestEpisodesEnabled", True)
+
 # Evaluated per viewport by run_checks. Kept as a module constant so the
 # quoting stays readable.
 JS_STYLING = """() => {
@@ -79,6 +87,12 @@ def run_checks(base, remote, shot_dir):
             page.on("response",
                     lambda r: bad_responses.append(f"{r.status} {r.url}")
                     if r.status >= 400 else None)
+            # Proves the disabled section costs no network call. The route mock
+            # below would happily answer a stray fetch, so counting requests is
+            # the only way to tell "not fetched" from "fetched and mocked".
+            episode_requests = []
+            page.on("request",
+                    lambda r: episode_requests.append(r.url) if "episodes?show=" in r.url else None)
 
             # Mock the-quill's episodeApi endpoint. This must be registered
             # BEFORE navigation - assets/latest-episodes.js fires its fetch
@@ -106,9 +120,18 @@ def run_checks(base, remote, shot_dir):
                   page.locator('link[rel="canonical"][href="https://thegrove.media/"]')
                       .count() == 1)
 
-            widget_items = page.locator('[data-episode-api] li').count()
-            pass_(f"{name}: latest-episodes widget renders fetched titles",
-                  widget_items == 2, f"found {widget_items} items, expected 2")
+            if LATEST_ENABLED:
+                widget_items = page.locator('[data-episode-api] li').count()
+                pass_(f"{name}: latest-episodes widget renders fetched titles",
+                      widget_items == 2, f"found {widget_items} items, expected 2")
+            else:
+                containers = page.locator('[data-episode-api]').count()
+                scripts = page.locator('script').count()
+                pass_(f"{name}: latest-episodes fully absent while disabled",
+                      containers == 0 and scripts == 0,
+                      f"containers={containers}, script tags={scripts}")
+                pass_(f"{name}: no episode fetch while disabled",
+                      not episode_requests, str(episode_requests))
 
             if not remote:
                 pass_(f"{name}: zero console errors",
@@ -212,11 +235,20 @@ def run_checks(base, remote, shot_dir):
         # A future reader should read this as "the widget's no-JS behavior is
         # an empty, still-present slot, not a missing one" - and this
         # assertion actually fails if that stops being true.
+        # While latestEpisodesEnabled is false there is no container and no
+        # script at all, so the no-JS story collapses into the JS story: the
+        # page is identical either way. That is a stronger property than the
+        # empty-slot behaviour it replaces, so assert it directly.
         widget = page.locator('[data-episode-api]')
         widget_li_count = widget.locator("li").count()
-        pass_("no-JS: latest-episodes container present but empty with JS disabled (expected)",
-              widget.count() == 1 and widget_li_count == 0,
-              f"container count={widget.count()}, items={widget_li_count}")
+        if LATEST_ENABLED:
+            pass_("no-JS: latest-episodes container present but empty with JS disabled (expected)",
+                  widget.count() == 1 and widget_li_count == 0,
+                  f"container count={widget.count()}, items={widget_li_count}")
+        else:
+            pass_("no-JS: page is identical with JS disabled (no widget to degrade)",
+                  widget.count() == 0 and page.locator("script").count() == 0,
+                  f"container count={widget.count()}, script tags={page.locator('script').count()}")
 
         context.close()
         browser.close()

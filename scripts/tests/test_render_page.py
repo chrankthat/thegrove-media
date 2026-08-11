@@ -1,3 +1,4 @@
+import copy
 import json
 import re
 import unittest
@@ -16,16 +17,28 @@ class TestRenderPage(unittest.TestCase):
     def setUp(self):
         self.out = render_page(CHANNELS, ICONS)
 
-    def test_exactly_one_same_origin_content_hashed_script_tag(self):
-        # This page shipped zero application JS until the 2026-08-10
-        # quill-episode-feed-linktree build added one optional, fail-soft,
-        # same-origin widget script (assets/latest-episodes.js). The old
-        # "zero script tags anywhere" assertion is no longer true by
-        # design - this pins the tighter invariant that replaces it:
-        # exactly one script tag, same-origin, content-hashed like every
-        # other /assets/* reference, deferred, and nothing third-party or
-        # CDN-hosted.
+    def test_no_script_tags_while_latest_episodes_is_disabled(self):
+        # Chris switched Latest Episodes off on 2026-08-11 pending a redesign,
+        # so channels.json ships latestEpisodesEnabled: false and the page is
+        # back to zero application JS. Pinned because a disabled section that
+        # still ships its widget script is the failure mode this flag exists to
+        # avoid - a fetch and a parse for markup that is not on the page.
         scripts = re.findall(r"<script[^>]*>", self.out)
+        self.assertEqual(scripts, [], f"expected zero <script> tags, found {scripts}")
+        self.assertNotIn("Latest Episodes", self.out)
+        self.assertNotIn("latest-list", self.out)
+        self.assertNotIn("cdn.tailwindcss.com", self.out)
+
+    def test_enabling_latest_episodes_restores_exactly_one_hashed_script(self):
+        # The widget invariant, kept under test while the section is off so the
+        # eventual redesign starts from a green baseline rather than rediscovering
+        # it: exactly one script tag, same-origin, content-hashed like every other
+        # /assets/* reference, deferred, nothing third-party or CDN-hosted.
+        channels = copy.deepcopy(CHANNELS)
+        channels["latestEpisodesEnabled"] = True
+        out = render_page(channels, ICONS)
+
+        scripts = re.findall(r"<script[^>]*>", out)
         self.assertEqual(len(scripts), 1, f"expected exactly one <script> tag, found {scripts}")
         tag = scripts[0]
         self.assertRegex(
@@ -35,7 +48,8 @@ class TestRenderPage(unittest.TestCase):
         self.assertIn("defer", tag)
         self.assertNotIn("http://", tag)
         self.assertNotIn("https://", tag)
-        self.assertNotIn("cdn.tailwindcss.com", self.out)
+        self.assertIn("Latest Episodes", out)
+        self.assertIn('<ul class="latest-list" data-episode-api', out)
 
     def test_shows_appear_in_locked_order(self):
         quill_pos = self.out.index('id="the-quill"')
