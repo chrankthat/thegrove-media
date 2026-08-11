@@ -19,6 +19,52 @@
     return n + " views";
   }
 
+  // THE VIEW NUMBER IS CROSS-PLATFORM, NOT YOUTUBE.
+  //
+  // `view_count` is the main YouTube video alone. `total_view_count` adds
+  // SUM(social_assets.view_count) - every other published asset for that
+  // story: YouTube shorts, Instagram Reels, the Instagram announce post, and
+  // TikTok. It deliberately excludes the (youtube, video) social row, because
+  // `view_count` already IS that video's count and summing both double-counts
+  // it. That exclusion is load-bearing and lives in TheQuill's
+  // worker/src/index.js:600-620 - do not "fix" it from this side.
+  //
+  // The gap is not cosmetic: at time of writing Toller reads 5 on YouTube and
+  // 2,145 everywhere, and ranking Most Popular on the YouTube field alone put
+  // the wrong story first.
+  //
+  // Coalesced rather than read bare so the page degrades to today's
+  // YouTube-only behaviour instead of blanking if the field ever leaves the
+  // response. Null semantics are identical: when a story has no social rows
+  // the API falls through to `view_count` including its null-ness, so the
+  // empty-state guard below keeps working unchanged.
+  function totalViews(ep) {
+    return ep.total_view_count ?? ep.view_count;
+  }
+
+  // The three marks are a UNIT on the number - they say "this count is
+  // measured across YouTube, Instagram and TikTok", the same way the word
+  // "views" says what is being counted. They are NOT a claim that this
+  // particular story was published to all three: the API returns the
+  // aggregate only, with no per-platform breakdown, so a presence claim is
+  // not something this page can honestly make. My Lost Chapters has no shorts
+  // and no crossposts, and its total legitimately equals its YouTube count.
+  //
+  // aria-hidden on the marks, with the meaning carried in sr-only text, so a
+  // screen reader hears "2.1K views across YouTube, Instagram and TikTok"
+  // rather than three unlabelled graphics.
+  const PLATFORM_ICON_IDS = ["icon-yt", "icon-ig", "icon-tt"];
+
+  function platformMarksHtml() {
+    return '<span class="views-platforms" aria-hidden="true">' +
+      PLATFORM_ICON_IDS.map(function (id) {
+        return '<svg class="platform-icon" viewBox="0 0 24 24" role="img">' +
+          '<use href="#' + id + '"></use></svg>';
+      }).join("") +
+      "</span>" +
+      '<span class="sr-only"> across YouTube, Instagram and TikTok</span>';
+  }
+
   function formatDate(iso) {
     const d = new Date(iso);
     return d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
@@ -91,10 +137,10 @@
       document.getElementById("latest-section").remove();
       return;
     }
-    const viewsText = formatViews(ep.view_count);
+    const viewsText = formatViews(totalViews(ep));
     const viewsBlock = viewsText
       ? '<span class="hero-views"><span class="ember-dot" aria-hidden="true"></span>' +
-          esc(viewsText) + "</span>"
+          esc(viewsText) + platformMarksHtml() + "</span>"
       : "<span></span>";
 
     const card =
@@ -126,10 +172,10 @@
   function renderPopular(episodes) {
     const wrap = document.getElementById("popular-scroll");
     episodes.forEach(function (ep) {
-      const viewsText = formatViews(ep.view_count);
+      const viewsText = formatViews(totalViews(ep));
       const viewsBlock = viewsText
         ? '<span class="popular-views"><span class="ember-dot" aria-hidden="true"></span>' +
-            esc(viewsText) + "</span>"
+            esc(viewsText) + platformMarksHtml() + "</span>"
         : "<span></span>";
 
       const card = document.createElement("div");
@@ -166,9 +212,9 @@
       row.dataset.format = ep.format;
       row.className = "episode-row tap";
       row.setAttribute("aria-label", "Watch " + ep.title + " on YouTube");
-      const viewsText = formatViews(ep.view_count);
+      const viewsText = formatViews(totalViews(ep));
       const metaText = esc(formatDate(ep.published_at)) +
-        (viewsText ? " &middot; " + esc(viewsText) : "");
+        (viewsText ? " &middot; " + esc(viewsText) + platformMarksHtml() : "");
       row.innerHTML =
         thumbHtml(ep.thumbnail_url, "row-thumb-wrap") +
         '<div class="row-body">' +
@@ -263,16 +309,21 @@
       renderLatestCard(byLatest[0]);
 
       // "Most Popular" is a ranking claim. If every episode has a null/
-      // undefined view_count (e.g. the daily view-count refresh hasn't run
+      // undefined count (e.g. the daily view-count refresh hasn't run
       // yet), there is no real ranking to show - sort() would just return
       // the stable input order (published_at DESC) under a label asserting
       // it's popularity-ordered. Drop the section rather than ship that.
+      //
+      // Ranked on the consolidated number, not the YouTube one: a "most
+      // popular" claim that ignores most of a story's actual audience is the
+      // less defensible of the two.
       const hasViewData = episodes.some(function (ep) {
-        return ep.view_count !== null && ep.view_count !== undefined;
+        const v = totalViews(ep);
+        return v !== null && v !== undefined;
       });
       if (hasViewData) {
         const popular = episodes.slice().sort(function (a, b) {
-          return (b.view_count ?? -1) - (a.view_count ?? -1);
+          return (totalViews(b) ?? -1) - (totalViews(a) ?? -1);
         }).slice(0, 3);
         renderPopular(popular);
       } else {

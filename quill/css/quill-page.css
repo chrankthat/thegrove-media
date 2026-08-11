@@ -144,6 +144,42 @@ h2.font-display {
   flex-shrink: 0;
 }
 
+/* PLATFORM MARKS ON THE VIEW COUNTS
+
+   The three marks are the unit on the number - the count spans YouTube,
+   Instagram and TikTok, not YouTube alone. See quill-page.js.
+
+   Sized in `em`, so one rule serves all three count sites at their own type
+   sizes (hero 0.75rem, popular 0.7rem, list rows 0.75rem) and they stay
+   locked to the number if any of those change. Slightly under-set at 0.95em
+   and held at 0.8 opacity so the marks read as an annotation and the number
+   stays the loudest thing in the row. flex-shrink:0 because the list-row meta
+   line wraps. */
+.views-platforms {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.22em;
+  margin-left: 0.4em;
+  flex-shrink: 0;
+  vertical-align: middle;
+}
+.platform-icon {
+  width: 0.95em;
+  height: 0.95em;
+  fill: currentColor;
+  opacity: 0.8;
+  display: block;
+}
+
+/* The count sites are aria-hidden marks plus a number; this carries the
+   "across YouTube, Instagram and TikTok" meaning to screen readers. Defined
+   here because this page loads quill-page.css alone, not the apex site.css
+   where the sibling copy lives. */
+.sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
+}
+
 .tap {
   min-height: 44px;
   min-width: 44px;
