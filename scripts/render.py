@@ -425,6 +425,26 @@ def render_about(studio):
     </section>'''
 
 
+def render_footer(channels):
+    """Copyright line plus the legal-page links from channels["legal"].
+
+    The links are not decoration. Platform API reviewers (TikTok, Meta,
+    Google) check that the Privacy Policy and Terms URLs registered with them
+    are reachable FROM the site itself, not merely that the URLs resolve when
+    typed directly - "visible on your official website" is TikTok's wording.
+    A missing footer link is a documented rejection cause.
+
+    Data-driven, so a third legal page is a channels.json edit with no code
+    change. Absent or empty `legal` degrades to the original bare copyright
+    line rather than rendering stray separators.
+    """
+    pieces = [esc(channels["footer"])]
+    for item in channels.get("legal", []):
+        pieces.append(f'<a href="{esc(item["href"])}">{esc(item["text"])}</a>')
+    body = ' <span aria-hidden="true">&middot;</span> '.join(pieces)
+    return f'  <footer class="site-footer"><p>{body}</p></footer>'
+
+
 def render_page(channels, icons):
     source_hash = build_hash()
     studio = channels["studio"]
@@ -450,7 +470,7 @@ def render_page(channels, icons):
     parts.append('    </div>')
     parts.append(render_about(studio))
     parts.append('  </main>')
-    parts.append(f'  <footer class="site-footer"><p>{esc(channels["footer"])}</p></footer>')
+    parts.append(render_footer(channels))
     parts.append('</div>')
     # Content-hashed like every other /assets/* reference: _headers caches
     # /assets/* immutably for a year with no purge permission on the CF

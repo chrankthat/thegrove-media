@@ -136,5 +136,9 @@
       "latest": []
     }
   ],
-  "footer": "© 2026 TheGrove AI, LLC"
+  "footer": "© 2026 TheGrove AI, LLC",
+  "legal": [
+    { "text": "Privacy", "href": "/privacy" },
+    { "text": "Terms", "href": "/terms" }
+  ]
 }

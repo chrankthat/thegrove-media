@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Terms of Service - TheGrove Studio</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="The terms governing use of TheGrove Studio's website and published content.">
+<link rel="canonical" href="https://thegrove.media/terms">
+<link rel="icon" type="image/png" href="/assets/thegrove-media-badge.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/tokens.css">
+<!--
+  Hand-authored, NOT generated. scripts/render.py owns index.html only; this
+  page is a static sibling of 404.html and quill/index.html.
+
+  Styles are duplicated from privacy.html deliberately rather than extracted
+  into css/legal.css: two pages is under the threshold where a shared
+  stylesheet pays for itself, and /css/* carries a 24h immutable edge TTL that
+  the Cloudflare token in use cannot purge - so a third file is a third thing
+  that can go stale at the edge. Revisit if a third legal page ever lands.
+-->
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: var(--paper);
+    color: var(--paper-ink);
+    font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    font-size: 1rem;
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .masthead { border-bottom: 1px solid rgba(var(--studio-amber-rgb), 0.35); }
+  .masthead-inner,
+  .doc,
+  .site-footer-inner {
+    max-width: 44rem;
+    margin: 0 auto;
+    padding-left: 1.25rem;
+    padding-right: 1.25rem;
+  }
+  .masthead-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    min-height: 64px;
+  }
+  .wordmark {
+    font-family: 'Fraunces', Georgia, serif;
+    font-weight: 600;
+    font-size: 1.0625rem;
+    letter-spacing: 0.01em;
+    color: var(--paper-ink);
+    text-decoration: none;
+  }
+  .masthead-nav { font-size: 0.875rem; }
+  .masthead-nav a { color: var(--paper-muted); text-decoration: none; }
+  .masthead-nav a:hover, .masthead-nav a:focus-visible { color: var(--paper-ink); text-decoration: underline; }
+
+  .doc { padding-top: 3rem; padding-bottom: 4rem; }
+
+  h1 {
+    font-family: 'Fraunces', Georgia, serif;
+    font-weight: 500;
+    font-size: 2rem;
+    line-height: 1.2;
+    margin: 0;
+  }
+  @media (min-width: 640px) { h1 { font-size: 2.5rem; } }
+
+  .updated {
+    margin: 0.75rem 0 0;
+    font-size: 0.8125rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--paper-muted);
+  }
+
+  .lede {
+    margin: 1.5rem 0 0;
+    font-size: 1.0625rem;
+    color: var(--paper-ink);
+  }
+
+  hr.rule {
+    border: 0;
+    border-top: 1px solid rgba(var(--studio-amber-rgb), 0.3);
+    margin: 2.5rem 0;
+  }
+
+  h2 {
+    font-family: 'Fraunces', Georgia, serif;
+    font-weight: 600;
+    font-size: 1.25rem;
+    line-height: 1.3;
+    margin: 2.5rem 0 0.75rem;
+  }
+  p { margin: 0 0 1rem; }
+  ul { margin: 0 0 1rem; padding-left: 1.25rem; }
+  li { margin-bottom: 0.5rem; }
+  strong { font-weight: 600; }
+  a { color: var(--paper-ink); text-decoration-color: var(--studio-amber); text-underline-offset: 0.15em; }
+  a:hover, a:focus-visible { text-decoration-thickness: 2px; }
+
+  .callout {
+    border-left: 3px solid var(--studio-amber);
+    background: rgba(var(--studio-amber-rgb), 0.08);
+    padding: 1rem 1.25rem;
+    margin: 1.5rem 0;
+    border-radius: 0 6px 6px 0;
+  }
+  .callout p:last-child { margin-bottom: 0; }
+
+  .site-footer { border-top: 1px solid rgba(var(--studio-amber-rgb), 0.3); }
+  .site-footer-inner {
+    padding-top: 1.75rem;
+    padding-bottom: 2.5rem;
+    text-align: center;
+    font-size: 0.78rem;
+    letter-spacing: 0.03em;
+    color: var(--paper-muted);
+  }
+  .site-footer a { color: var(--paper-muted); }
+
+  :focus-visible { outline: 2px solid var(--paper-ink); outline-offset: 2px; }
+</style>
+</head>
+<body>
+
+<header class="masthead">
+  <div class="masthead-inner">
+    <a class="wordmark" href="/">TheGrove Studio</a>
+    <nav class="masthead-nav"><a href="/privacy">Privacy Policy</a></nav>
+  </div>
+</header>
+
+<main class="doc">
+  <h1>Terms of Service</h1>
+  <p class="updated">Last updated 10 August 2026</p>
+
+  <p class="lede">These terms govern your use of thegrove.media, quill.thegrove.media, and any other website operated by TheGrove AI, LLC under the TheGrove Studio name. By using the site, you agree to them. If you do not agree, please do not use the site.</p>
+
+  <hr class="rule">
+
+  <h2>What this site is</h2>
+  <p>TheGrove Studio publishes three shows: The Quill, The Little Feather, and Human in the Loop. This website is an informational catalogue of that work - descriptions of each show, links to where episodes can be watched or listened to, and published performance figures. It is provided free of charge, for personal, non-commercial use.</p>
+
+  <div class="callout">
+    <p>There is nothing to sign up for. This site has no user accounts, no subscriptions, no payments, and no user-submitted content. Nothing here asks you for personal information.</p>
+  </div>
+
+  <h2>Content and intellectual property</h2>
+  <p>The shows, episodes, scripts, artwork, logos, and written material published by TheGrove Studio are the property of TheGrove AI, LLC or its licensors, and are protected by copyright and trademark law. You may link to this site and share our episodes through the platforms that host them. You may not copy, republish, redistribute, or create derivative works from our content, or use our names or logos to suggest an affiliation or endorsement that does not exist, without our written permission.</p>
+  <p>The Little Feather is unofficial fan-made work. It is not affiliated with, endorsed by, or sponsored by Nintendo, Game Freak, Creatures Inc., or The Pokémon Company, and all trademarks referenced in it remain the property of their respective owners.</p>
+
+  <h2>Third-party platforms and links</h2>
+  <p>Our episodes are hosted and distributed by third parties, including YouTube, Spotify, Apple Podcasts, Instagram, Facebook, and TikTok. This site links to them. We do not control those platforms, and your use of them is governed by their own terms and privacy policies, not ours. We are not responsible for their content, availability, or practices.</p>
+
+  <h2>Connected accounts and platform data</h2>
+  <p>TheGrove Studio operates internal tooling that connects, with our own authorization, to social media accounts that TheGrove AI, LLC owns, in order to read performance data about our own published episodes. This tooling is not offered to the public and provides no service to visitors of this site. Our handling of the data it retrieves is described in the <a href="/privacy">Privacy Policy</a>. Where we access a platform's API, we do so subject to that platform's developer terms, and we may lose or change that access if the platform's terms or availability change.</p>
+
+  <h2>Accuracy and availability</h2>
+  <p>We publish this site in good faith and try to keep it correct and current, but we do not guarantee that it is free of errors or that it will be available without interruption. Published figures such as view counts are drawn from third-party platforms, are refreshed periodically rather than in real time, and may lag or differ from what those platforms display. Historical content in our episodes is researched and sourced, but it is storytelling, not scholarship, and should not be relied upon as professional, legal, medical, or financial advice.</p>
+
+  <h2>Acceptable use</h2>
+  <p>Do not use this site to break the law, to attempt unauthorized access to our systems or anyone else's, to scrape or overload it in a way that degrades service for others, or to misrepresent your relationship with TheGrove AI, LLC.</p>
+
+  <h2>Disclaimer and limitation of liability</h2>
+  <p>This site and its content are provided "as is", without warranties of any kind, express or implied, including any implied warranties of merchantability, fitness for a particular purpose, or non-infringement. To the fullest extent permitted by law, TheGrove AI, LLC and its operators will not be liable for any indirect, incidental, special, consequential, or punitive damages, or for any loss of data, revenue, or goodwill, arising out of your use of or inability to use this site.</p>
+
+  <h2>Changes to these terms</h2>
+  <p>We may update these terms as the studio's work changes. The revision date at the top of this page always reflects the current version. Continuing to use the site after an update means you accept the revised terms.</p>
+
+  <!--
+    GOVERNING LAW: Georgia. TheGrove AI, LLC is a Georgia domestic LLC
+    (GA SOS Certificate of Organization, control no. 26115255, effective
+    2026-05-17; principal office in Gwinnett County). Wording is aligned with
+    section 12.1 of the company's operating agreement, which reads "governed by
+    the laws of the State of Georgia, without regard to conflict-of-laws
+    principles". If the entity's state of formation ever changes, this clause
+    and the operating agreement move together.
+  -->
+  <h2>Governing law</h2>
+  <p>These terms are governed by the laws of the State of Georgia, United States, without regard to its conflict-of-law rules. Any dispute arising from them will be brought in the state or federal courts located in the State of Georgia.</p>
+
+  <h2>Contact</h2>
+  <p>Questions about these terms go to <a href="mailto:chris@thegrove.llc">chris@thegrove.llc</a> - TheGrove AI, LLC.</p>
+</main>
+
+<footer class="site-footer">
+  <div class="site-footer-inner">
+    &copy; 2026 TheGrove AI, LLC &middot; <a href="/privacy">Privacy</a> &middot; <a href="/terms">Terms</a>
+  </div>
+</footer>
+
+</body>
+</html>

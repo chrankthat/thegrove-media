@@ -457,6 +457,8 @@ a { color: inherit; }
 .site-footer { padding: 22px 0 40px; text-align: center; }
 @media (min-width: 768px) { .site-footer { padding: 1.75rem 1.25rem 2.5rem; border-top: 1px solid rgba(var(--studio-amber-rgb), 0.3); } }
 .site-footer p { font-family: 'Inter', sans-serif; font-size: 0.78rem; letter-spacing: 0.03em; color: var(--chrome-muted); margin: 0; }
+.site-footer a { text-decoration: underline; text-decoration-color: rgba(var(--studio-amber-rgb), 0.7); text-underline-offset: 0.2em; }
+.site-footer a:hover, .site-footer a:focus-visible { color: var(--chrome-ink); text-decoration-thickness: 2px; }
 
 /* ---- motion: hover/focus micro-interactions only. Nothing ever starts
    hidden, nothing waits on JS to reveal itself. ---- */

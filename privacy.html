@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Privacy Policy - TheGrove Studio</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="How TheGrove Studio handles visitor information and data accessed from connected platform accounts.">
+<link rel="canonical" href="https://thegrove.media/privacy">
+<link rel="icon" type="image/png" href="/assets/thegrove-media-badge.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/tokens.css">
+<!--
+  Hand-authored, NOT generated. scripts/render.py owns index.html only; this
+  page is a static sibling of 404.html and quill/index.html.
+
+  It deliberately does not load css/site.css - that stylesheet is built around
+  the landing page's show-tile layout and carries nothing a prose document
+  needs. Palette and font families come from css/tokens.css so this page moves
+  with the studio's design tokens rather than forking them.
+
+  The "Connected platform accounts" section is load-bearing, not boilerplate:
+  platform API reviewers (TikTok, Meta, Google) read this page to confirm the
+  disclosed data handling matches the scopes the app requests. If the requested
+  scopes change, this section changes in the same commit.
+-->
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: var(--paper);
+    color: var(--paper-ink);
+    font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    font-size: 1rem;
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .masthead { border-bottom: 1px solid rgba(var(--studio-amber-rgb), 0.35); }
+  .masthead-inner,
+  .doc,
+  .site-footer-inner {
+    max-width: 44rem;
+    margin: 0 auto;
+    padding-left: 1.25rem;
+    padding-right: 1.25rem;
+  }
+  .masthead-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    min-height: 64px;
+  }
+  .wordmark {
+    font-family: 'Fraunces', Georgia, serif;
+    font-weight: 600;
+    font-size: 1.0625rem;
+    letter-spacing: 0.01em;
+    color: var(--paper-ink);
+    text-decoration: none;
+  }
+  .masthead-nav { font-size: 0.875rem; }
+  .masthead-nav a { color: var(--paper-muted); text-decoration: none; }
+  .masthead-nav a:hover, .masthead-nav a:focus-visible { color: var(--paper-ink); text-decoration: underline; }
+
+  .doc { padding-top: 3rem; padding-bottom: 4rem; }
+
+  h1 {
+    font-family: 'Fraunces', Georgia, serif;
+    font-weight: 500;
+    font-size: 2rem;
+    line-height: 1.2;
+    margin: 0;
+  }
+  @media (min-width: 640px) { h1 { font-size: 2.5rem; } }
+
+  .updated {
+    margin: 0.75rem 0 0;
+    font-size: 0.8125rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--paper-muted);
+  }
+
+  .lede {
+    margin: 1.5rem 0 0;
+    font-size: 1.0625rem;
+    color: var(--paper-ink);
+  }
+
+  hr.rule {
+    border: 0;
+    border-top: 1px solid rgba(var(--studio-amber-rgb), 0.3);
+    margin: 2.5rem 0;
+  }
+
+  h2 {
+    font-family: 'Fraunces', Georgia, serif;
+    font-weight: 600;
+    font-size: 1.25rem;
+    line-height: 1.3;
+    margin: 2.5rem 0 0.75rem;
+  }
+  h3 {
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    font-size: 0.9375rem;
+    letter-spacing: 0.02em;
+    margin: 1.75rem 0 0.5rem;
+  }
+  p { margin: 0 0 1rem; }
+  ul { margin: 0 0 1rem; padding-left: 1.25rem; }
+  li { margin-bottom: 0.5rem; }
+  strong { font-weight: 600; }
+  code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.875em;
+    background: rgba(var(--studio-amber-rgb), 0.12);
+    padding: 0.1em 0.35em;
+    border-radius: 4px;
+  }
+  a { color: var(--paper-ink); text-decoration-color: var(--studio-amber); text-underline-offset: 0.15em; }
+  a:hover, a:focus-visible { text-decoration-thickness: 2px; }
+
+  .callout {
+    border-left: 3px solid var(--studio-amber);
+    background: rgba(var(--studio-amber-rgb), 0.08);
+    padding: 1rem 1.25rem;
+    margin: 1.5rem 0;
+    border-radius: 0 6px 6px 0;
+  }
+  .callout p:last-child { margin-bottom: 0; }
+
+  .site-footer { border-top: 1px solid rgba(var(--studio-amber-rgb), 0.3); }
+  .site-footer-inner {
+    padding-top: 1.75rem;
+    padding-bottom: 2.5rem;
+    text-align: center;
+    font-size: 0.78rem;
+    letter-spacing: 0.03em;
+    color: var(--paper-muted);
+  }
+  .site-footer a { color: var(--paper-muted); }
+
+  :focus-visible { outline: 2px solid var(--paper-ink); outline-offset: 2px; }
+</style>
+</head>
+<body>
+
+<header class="masthead">
+  <div class="masthead-inner">
+    <a class="wordmark" href="/">TheGrove Studio</a>
+    <nav class="masthead-nav"><a href="/terms">Terms of Service</a></nav>
+  </div>
+</header>
+
+<main class="doc">
+  <h1>Privacy Policy</h1>
+  <p class="updated">Last updated 10 August 2026</p>
+
+  <p class="lede">TheGrove Studio is the media arm of TheGrove AI, LLC. It produces and publishes three shows - The Quill, The Little Feather, and Human in the Loop - and operates this website along with the internal tools used to run them. This policy explains what information we handle and what we do with it.</p>
+
+  <hr class="rule">
+
+  <h2>The short version</h2>
+  <p>We do not sell your data, we do not run advertising, we do not set cookies, and we do not use any third-party analytics or tracking on this website. We do not ask you to create an account, because there are no accounts. The only substantial data we handle comes from social media accounts <em>we ourselves own</em>, connected by us, to count how our own episodes are performing.</p>
+
+  <h2>Information collected from visitors to this website</h2>
+  <p>This site is a static website. It has no login, no forms, no comments, and no shopping. We do not knowingly collect any personal information from visitors.</p>
+  <ul>
+    <li><strong>No cookies.</strong> This site sets no cookies of its own and embeds no third-party tracking or advertising scripts.</li>
+    <li><strong>No analytics products.</strong> We do not use Google Analytics or any comparable visitor-tracking service.</li>
+    <li><strong>Standard server logs.</strong> Our hosting provider, Cloudflare, processes ordinary request data such as IP address, user agent, and requested URL in order to serve the page and protect against abuse. This is handled by Cloudflare under its own privacy terms; we do not use it to build profiles of visitors.</li>
+    <li><strong>Embedded and linked content.</strong> Pages on this site display episode artwork served from our own feeds and from YouTube, and link out to YouTube, Spotify, Apple Podcasts, Instagram, Facebook, and TikTok. Once you follow a link to one of those platforms, that platform's own privacy policy governs what it collects.</li>
+    <li><strong>Web fonts.</strong> Pages on this site load typefaces from Google Fonts. Your browser requests those font files directly from Google, which means Google receives the request, including your IP address, as part of serving them. Google states that it does not use Google Fonts requests to create profiles of end users. We receive nothing from this and it is not used for analytics.</li>
+  </ul>
+
+  <h2>Connected platform accounts</h2>
+  <p>TheGrove Studio operates an internal application, <strong>TheGrove Studio Analytics</strong>, which reads performance data for the episodes we publish. It connects only to social media accounts that TheGrove AI, LLC owns and operates, authorized by us through each platform's standard consent flow. <strong>It never accesses any other person's account, and it cannot be used by the public to connect an account.</strong></p>
+
+  <div class="callout">
+    <p><strong>The purpose is one number.</strong> Each episode we publish lives on several platforms at once - a long-form video, short vertical cuts, and social posts. To report how an episode actually performed, we read the view and engagement counts for our own posts on each platform and add them together. That combined figure is what appears alongside each episode in our public catalogue at <a href="https://quill.thegrove.media">quill.thegrove.media</a>.</p>
+  </div>
+
+  <h3>TikTok</h3>
+  <p>We access data from our own TikTok account, <a href="https://www.tiktok.com/@thequilltruestories">@thequilltruestories</a>, through the TikTok Display API using these permissions:</p>
+  <ul>
+    <li><code>user.info.basic</code> - the account's display name, avatar, and profile link, used to label which account a set of figures belongs to.</li>
+    <li><code>user.info.stats</code> - the account's follower count, total likes, and video count, shown as a channel summary.</li>
+    <li><code>video.list</code> - the list of videos we have published to that account and their view, like, comment, and share counts. Each video is matched to the episode it was cut from so the counts can be totalled with the same figures from our other platforms.</li>
+  </ul>
+  <p><strong>Access is read-only.</strong> We do not request permission to post, upload, edit, or delete content, and the application cannot do so. We do not access private videos, drafts, direct messages, or any data belonging to viewers, followers, or commenters.</p>
+
+  <h3>YouTube, Instagram, and Facebook</h3>
+  <p>We access equivalent read-only performance data for our own channels and pages on YouTube (via the YouTube Data API) and Instagram and Facebook (via the Meta Graph API), for the same purpose, on the same read-only basis. Our use of information received from Google APIs adheres to the <a href="https://developers.google.com/terms/api-services-user-data-policy" rel="noopener">Google API Services User Data Policy</a>, including the Limited Use requirements.</p>
+
+  <h3>How this data is stored, used, and retained</h3>
+  <ul>
+    <li><strong>Storage.</strong> Access credentials for connected accounts are held privately on operator-controlled systems with restricted permissions. They are never committed to any code repository, never published, and never shared with anyone outside TheGrove AI, LLC.</li>
+    <li><strong>Use.</strong> Platform data is used solely to produce per-episode and per-account performance figures for our own editorial and business decisions, and to display a combined public view count per episode. It is not used for advertising, not used to train machine-learning models, and not combined with data about any individual.</li>
+    <li><strong>What becomes public.</strong> The only platform-derived information published on this website is aggregate counts - views, and totals per episode. No individual viewer, follower, or commenter is identified, and no per-person data is collected, stored, or displayed.</li>
+    <li><strong>Sharing.</strong> We do not sell, rent, or transfer platform data to third parties. It is disclosed only if required by law.</li>
+    <li><strong>Retention.</strong> Aggregate counts are retained as a historical performance record for as long as the episode is published. Access credentials are retained only while the connection is in use and are deleted when access is revoked.</li>
+    <li><strong>Revoking access.</strong> Because the connected accounts are our own, access is revoked by us from within each platform's own settings - for TikTok, under Settings and privacy, Security and permissions, Manage app permissions. Revoking access immediately stops all further data collection, and the stored credential is deleted.</li>
+  </ul>
+
+  <h2>Children's privacy</h2>
+  <p>This website is not directed to children and does not knowingly collect personal information from anyone, including children under 13. One of our shows, The Little Feather, makes content <em>for</em> young children, and is designated as made-for-kids on the platforms that carry it - but that designation governs the video platform's own handling of viewer data, not this website, which collects nothing. If you believe a child has somehow provided us personal information, contact us and we will delete it.</p>
+
+  <h2>Security</h2>
+  <p>This site is served over HTTPS with a strict content security policy. Credentials for connected accounts are stored with restricted access on systems under our control. No system is perfectly secure, but we hold no visitor accounts, no payment information, and no personal records, which keeps the exposure of this site inherently small.</p>
+
+  <h2>Your rights</h2>
+  <p>Depending on where you live, you may have rights to access, correct, or delete personal information a company holds about you. In our case the honest answer is usually that we hold none - there are no accounts and no visitor tracking here. If you would like to confirm that, or make a request, contact us at the address below and we will respond.</p>
+
+  <h2>Changes to this policy</h2>
+  <p>We may update this policy as our shows and tools change. The revision date at the top of this page always reflects the current version, and material changes will be described here rather than made silently.</p>
+
+  <h2>Contact</h2>
+  <p>Questions about this policy, or about data we hold, go to <a href="mailto:chris@thegrove.llc">chris@thegrove.llc</a> - TheGrove AI, LLC.</p>
+</main>
+
+<footer class="site-footer">
+  <div class="site-footer-inner">
+    &copy; 2026 TheGrove AI, LLC &middot; <a href="/privacy">Privacy</a> &middot; <a href="/terms">Terms</a>
+  </div>
+</footer>
+
+</body>
+</html>

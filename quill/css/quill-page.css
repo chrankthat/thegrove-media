@@ -512,6 +512,8 @@ a:focus-visible, button:focus-visible {
    Footer, empty + loading states
    ========================================================================== */
 
+.site-footer a { text-decoration: underline; text-decoration-color: rgba(201, 191, 168, 0.45); text-underline-offset: 0.2em; }
+.site-footer a:hover, .site-footer a:focus-visible { color: rgba(246, 234, 214, 0.95); text-decoration-thickness: 2px; }
 .site-footer {
   margin-top: 3.5rem;
   text-align: center;
