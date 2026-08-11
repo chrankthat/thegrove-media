@@ -6,3 +6,6 @@ verification/
 
 # wrangler pages dev local cache
 .wrangler/
+
+# working screenshots and throwaway files - never part of the site
+scratch/
