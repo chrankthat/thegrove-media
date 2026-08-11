@@ -376,6 +376,14 @@ a:focus-visible, button:focus-visible {
   line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  /* Reserve both lines even when the title only needs one. The clamp above is
+     a MAXIMUM; without a matching minimum a one-line title makes that card's
+     .frame shorter than its neighbours, and since the dashed frame is drawn on
+     content (the flex stretch applies to .popular-card, not to .frame inside
+     it), the row's borders and view counts stop lining up. Two lines is the
+     clamp ceiling, so this reserves space without ever adding a third line.
+     2.2rem = 2 x the 1.1rem line-height above - the two move together. */
+  min-height: 2.2rem;
 }
 .popular-bottom-row {
   margin-top: 0.3rem;
